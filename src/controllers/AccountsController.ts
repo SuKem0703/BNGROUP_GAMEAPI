@@ -1,4 +1,6 @@
 import { Request, Response } from 'express';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 import { ApplicationDbContext } from '../config/database';
 import { Account, AccountStatus } from '../models/user/Account';
 import { SaveData } from '../models/user/SaveData';
@@ -26,10 +28,18 @@ export class AccountsController {
             const prefix = `${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
             let generatedId = "";
 
+            // --- ĐỌC DỮ LIỆU FILE SAVE MẶC ĐỊNH ---
+            let saveDataJson = "{}";
+            try {
+                const filePath = path.join(process.cwd(), 'src', 'data', 'NewGameSaveData.json');
+                saveDataJson = await fs.readFile(filePath, 'utf8');
+            } catch (error) {
+                console.error("Không tìm thấy file NewGameSaveData.json, sử dụng JSON rỗng.");
+            }
+
             await ApplicationDbContext.manager.transaction(async (transactionalEntityManager) => {
                 let success = false;
                 for (let retry = 0; retry < 5; retry++) {
-                    // Logic tạo ID tương đối giống C# gốc
                     const countToday = await transactionalEntityManager.count(Account) + 1;
                     const serial = String(countToday).padStart(4, '0');
                     generatedId = prefix + serial;
@@ -37,6 +47,7 @@ export class AccountsController {
                     const checkId = await transactionalEntityManager.findOne(Account, { where: { id: generatedId } });
                     
                     if (!checkId) {
+                        // Tạo Account
                         const account = new Account();
                         account.id = generatedId;
                         account.username = username;
@@ -45,10 +56,12 @@ export class AccountsController {
                         account.createdAt = now;
                         account.status = AccountStatus.None;
 
+                        // Tạo SaveData từ file JSON
                         const saveData = new SaveData();
                         saveData.accountId = generatedId;
-                        saveData.dataSave = "{}"; // Giả lập đọc file JSON mặc định
+                        saveData.dataSave = saveDataJson;
 
+                        // Khởi tạo Stats mặc định
                         const userStat = new UserStat();
                         userStat.accountId = generatedId;
                         userStat.level = 1;
@@ -60,6 +73,7 @@ export class AccountsController {
                         userStat.con = 0;
                         userStat.updatedAt = now;
 
+                        // Khởi tạo Ví tiền mặc định
                         const userCurrency = new UserCurrency();
                         userCurrency.accountId = generatedId;
                         userCurrency.coin = 100;
@@ -74,7 +88,7 @@ export class AccountsController {
                         success = true;
                         break;
                     }
-                    await new Promise(resolve => setTimeout(resolve, 10)); // Đợi xíu
+                    await new Promise(resolve => setTimeout(resolve, 10));
                 }
 
                 if (!success) throw new Error("Server quá tải, không thể tạo ID.");

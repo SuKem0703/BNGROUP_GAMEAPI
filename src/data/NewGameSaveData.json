@@ -1,16 +1,16 @@
 {
   "playerPosition": {
-    "x": -14.0,
-    "y": -2.0,
+    "x": -8.0,
+    "y": 7.0,
     "z": 0.0
   },
-  "currentSceneName": "1.0_Trong nhà",
+  "currentSceneName": "MAP_CH1_01",
   "checkpointPosition": {
-    "x": -14.0,
-    "y": -2.0,
+    "x": -8.0,
+    "y": 7.0,
     "z": 0.0
   },
-  "checkpointSceneName": "1.0_Trong nhà",
+  "checkpointSceneName": "MAP_CH1_01",
   "backPackSlotCount": 35,
   "inventorySaveData": [
     {
