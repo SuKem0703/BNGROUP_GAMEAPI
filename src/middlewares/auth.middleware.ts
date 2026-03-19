@@ -15,7 +15,6 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
         const secret = process.env.JWT_SECRET || 'my_super_secret_key_1234567890123456';
         const decoded = jwt.verify(token, secret);
         
-        // Gắn thông tin giải mã được vào request để các Controller sử dụng
         (req as any).user = decoded;
         next();
     } catch (error) {

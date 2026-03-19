@@ -1,5 +1,5 @@
-import { SaveData } from './SaveData.js';
-import { OneToOne } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, OneToOne } from 'typeorm';
+import { SaveData } from './SaveData';
 
 export enum AccountStatus {
     None = 0,
@@ -8,14 +8,26 @@ export enum AccountStatus {
     Unbanned = 3
 }
 
+@Entity('Accounts')
 export class Account {
-    id?: string; 
+    @PrimaryColumn({ type: 'varchar' })
+    id!: string; 
+
+    @Column({ type: 'varchar' })
     username: string = '';
+
+    @Column({ type: 'varchar' })
     email: string = '';
+
+    @Column({ type: 'varchar' })
     passwordHash: string = '';
+
+    @CreateDateColumn()
     createdAt: Date = new Date();
+
+    @Column({ type: 'int', default: AccountStatus.None })
     status: AccountStatus = AccountStatus.None;
 
-    @OneToOne(() => SaveData, (saveData: SaveData) => saveData.account)
+    @OneToOne(() => SaveData, saveData => saveData.account)
     saveData?: SaveData;
 }
