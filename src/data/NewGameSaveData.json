@@ -1,0 +1,488 @@
+{
+  "playerPosition": {
+    "x": -14.0,
+    "y": -2.0,
+    "z": 0.0
+  },
+  "currentSceneName": "1.0_Trong nhà",
+  "checkpointPosition": {
+    "x": -14.0,
+    "y": -2.0,
+    "z": 0.0
+  },
+  "checkpointSceneName": "1.0_Trong nhà",
+  "backPackSlotCount": 35,
+  "inventorySaveData": [
+    {
+      "itemID": 11,
+      "slotIndex": 0,
+      "quantity": 1,
+      "isEquipped": false,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 18,
+      "slotIndex": 1,
+      "quantity": 1,
+      "isEquipped": false,
+      "rarity": 0,
+      "qualityFactor": 0.8649933338165283
+    },
+    {
+      "itemID": 12,
+      "slotIndex": 2,
+      "quantity": 1,
+      "isEquipped": true,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 18,
+      "slotIndex": 3,
+      "quantity": 1,
+      "isEquipped": false,
+      "rarity": 3,
+      "qualityFactor": 0.6624351143836975
+    },
+    {
+      "itemID": 33,
+      "slotIndex": 4,
+      "quantity": 1,
+      "isEquipped": false,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 40,
+      "slotIndex": 5,
+      "quantity": 1,
+      "isEquipped": true,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 32,
+      "slotIndex": 6,
+      "quantity": 1,
+      "isEquipped": true,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 61,
+      "slotIndex": 7,
+      "quantity": 13,
+      "isEquipped": false,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 18,
+      "slotIndex": 8,
+      "quantity": 1,
+      "isEquipped": false,
+      "rarity": 0,
+      "qualityFactor": 0.7802757024765015
+    },
+    {
+      "itemID": 54,
+      "slotIndex": 9,
+      "quantity": 1,
+      "isEquipped": true,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 2,
+      "slotIndex": 11,
+      "quantity": 2,
+      "isEquipped": false,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 63,
+      "slotIndex": 12,
+      "quantity": 5,
+      "isEquipped": false,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 30,
+      "slotIndex": 13,
+      "quantity": 1,
+      "isEquipped": false,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 20,
+      "slotIndex": 14,
+      "quantity": 1,
+      "isEquipped": false,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 11,
+      "slotIndex": 15,
+      "quantity": 1,
+      "isEquipped": false,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    },
+    {
+      "itemID": 21,
+      "slotIndex": 16,
+      "quantity": 1,
+      "isEquipped": false,
+      "rarity": 1,
+      "qualityFactor": 1.0
+    }
+  ],
+  "hotbarSaveData": [
+    {
+      "itemID": 1,
+      "slotIndex": 0,
+      "quantity": 449,
+      "isEquipped": false,
+      "rarity": 0,
+      "qualityFactor": 0.0
+    },
+    {
+      "itemID": 62,
+      "slotIndex": 1,
+      "quantity": 94,
+      "isEquipped": false,
+      "rarity": 0,
+      "qualityFactor": 0.0
+    },
+    {
+      "itemID": 60,
+      "slotIndex": 2,
+      "quantity": 96,
+      "isEquipped": false,
+      "rarity": 0,
+      "qualityFactor": 0.0
+    }
+  ],
+  "chestSaveData": [
+    {
+      "chestID": "",
+      "isOpened": true
+    },
+    {
+      "chestID": "1.1_-5_28",
+      "isOpened": false
+    },
+    {
+      "chestID": "Abyss 1_0_16",
+      "isOpened": false
+    },
+    {
+      "chestID": "BeginTown_14_-16",
+      "isOpened": false
+    }
+  ],
+  "questProgressData": [],
+  "handInQuestIDs": [ "FirstCombatQuestID" ],
+  "lvl": 51,
+  "exp": 3510,
+  "coin": 29640,
+  "gem": 9560,
+  "currentKnightHP": 382,
+  "currentmageHP": 100,
+  "currentKnightMP": 50,
+  "currentMageMP": 50,
+  "currentStamina": 20.0,
+  "str": 20,
+  "dex": 150,
+  "con": 20,
+  "intStat": 0,
+  "potentialPoints": 65,
+  "knightEquipSaveData": [
+    {
+      "itemID": 40,
+      "slotIndex": 1,
+      "quantity": 1,
+      "isEquipped": true,
+      "rarity": 1,
+      "qualityFactor": 1.0,
+      "sourceItemID": -1
+    },
+    {
+      "itemID": 32,
+      "slotIndex": 2,
+      "quantity": 1,
+      "isEquipped": true,
+      "rarity": 1,
+      "qualityFactor": 1.0,
+      "sourceItemID": -1
+    },
+    {
+      "itemID": 54,
+      "slotIndex": 3,
+      "quantity": 1,
+      "isEquipped": true,
+      "rarity": 1,
+      "qualityFactor": 1.0,
+      "sourceItemID": -1
+    }
+  ],
+  "mageEquipSaveData": [],
+  "shareEquipSaveData": [],
+  "farmData": {
+    "plotDataList": [
+      {
+        "plotID": "1.1_-31_-21",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-33_-21",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-33_-20",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-31_-20",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-31_-19",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-32_-20",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-32_-19",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-34_-21",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-35_-21",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-33_-19",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-32_-21",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-34_-20",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-34_-19",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-35_-20",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_-35_-19",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_Vườn_-42_-34",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_Vườn_-41_-34",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_Vườn_-43_-35",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_Vườn_-43_-33",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_Vườn_-42_-33",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_Vườn_-43_-34",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_Vườn_-42_-35",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_Vườn_-41_-33",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      },
+      {
+        "plotID": "1.1_Vườn_-41_-35",
+        "hasCrop": false,
+        "cropData": {
+          "seedItemID": 0,
+          "currentStage": 0,
+          "currentTimer": 0.0
+        }
+      }
+    ]
+  },
+  "allChestsData": [
+    {
+      "chestID": "1.1_-31_-25",
+      "items": []
+    },
+    {
+      "chestID": "1.0_-11_7",
+      "items": []
+    },
+    {
+      "chestID": "1.0_Trong nhà_-11_7",
+      "items": []
+    }
+  ],
+  "collectedByScene": [
+    {
+      "sceneName": "1.0_Trong nhà",
+      "collectedIDs": []
+    },
+    {
+      "sceneName": "1.1",
+      "collectedIDs": []
+    },
+    {
+      "sceneName": "1.1_Vườn",
+      "collectedIDs": []
+    },
+    {
+      "sceneName": "Abyss 1",
+      "collectedIDs": []
+    }
+  ]
+}
