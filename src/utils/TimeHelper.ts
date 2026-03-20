@@ -6,6 +6,7 @@ export class TimeHelper {
     }
 
     public static getVietnamTime(): Date {
-        return this.toVietnamTime(new Date());
+        // return this.toVietnamTime(new Date());
+        return new Date();
     }
 }
