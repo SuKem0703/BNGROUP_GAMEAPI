@@ -42,9 +42,20 @@ export class EconomyController {
     }
 
     public static async spendCurrency(req: Request, res: Response): Promise<void> {
-        const { currencyType, amount } = req.body;
-        if (amount <= 0) {
+        const { currencyType } = req.body;
+        const amount = Number(req.body.amount);
+        
+        if (isNaN(amount) || amount <= 0) {
             res.status(400).json("Số tiền không hợp lệ.");
+            return;
+        }
+
+        const type = currencyType?.toLowerCase();
+        const isCoin = type === "coin" || type === "coins";
+        const isGem = type === "gem" || type === "gems";
+
+        if (!isCoin && !isGem) {
+            res.status(400).json("Loại tiền tệ không hợp lệ.");
             return;
         }
 
@@ -54,25 +65,24 @@ export class EconomyController {
             await ApplicationDbContext.manager.transaction(async (manager) => {
                 const wallet = await EconomyController.getOrCreateWallet(accountId);
                 let success = false;
-                const type = currencyType.toLowerCase();
 
-                if (type === "coin" && wallet.coin >= amount) {
+                if (isCoin && wallet.coin >= amount) {
                     wallet.coin -= amount;
                     success = true;
-                } else if (type === "gem" && wallet.gem >= amount) {
+                } else if (isGem && wallet.gem >= amount) {
                     wallet.gem -= amount;
                     success = true;
                 }
 
                 if (!success) {
-                    res.status(200).json({ success: false, newBalance: type === "coin" ? wallet.coin : wallet.gem, message: "Không đủ tiền." });
+                    res.status(200).json({ success: false, newBalance: isCoin ? wallet.coin : wallet.gem, message: "Không đủ tiền." });
                     return;
                 }
 
                 wallet.updatedAt = TimeHelper.getVietnamTime();
                 await manager.save(wallet);
 
-                res.status(200).json({ success: true, newBalance: type === "coin" ? wallet.coin : wallet.gem, message: "Thành công." });
+                res.status(200).json({ success: true, newBalance: isCoin ? wallet.coin : wallet.gem, message: "Thành công." });
             });
         } catch {
             res.status(400).json("Lỗi giao dịch.");
@@ -80,21 +90,32 @@ export class EconomyController {
     }
 
     public static async earnCurrency(req: Request, res: Response): Promise<void> {
-        const { currencyType, amount } = req.body;
-        if (amount <= 0) {
+        const { currencyType } = req.body;
+        const amount = Number(req.body.amount);
+
+        if (isNaN(amount) || amount <= 0) {
             res.status(400).json("Số tiền không hợp lệ.");
+            return;
+        }
+
+        const type = currencyType?.toLowerCase();
+        const isCoin = type === "coin" || type === "coins";
+        const isGem = type === "gem" || type === "gems";
+
+        if (!isCoin && !isGem) {
+            res.status(400).json("Loại tiền tệ không hợp lệ.");
             return;
         }
 
         const accountId = (req as any).user.accountId;
         const wallet = await EconomyController.getOrCreateWallet(accountId);
 
-        if (currencyType.toLowerCase() === "coin") wallet.coin += amount;
-        else wallet.gem += amount;
+        if (isCoin) wallet.coin += amount;
+        else if (isGem) wallet.gem += amount;
 
         wallet.updatedAt = TimeHelper.getVietnamTime();
         await ApplicationDbContext.getRepository(UserCurrency).save(wallet);
 
-        res.status(200).json({ success: true, newBalance: currencyType.toLowerCase() === "coin" ? wallet.coin : wallet.gem, message: "Nhận thành công." });
+        res.status(200).json({ success: true, newBalance: isCoin ? wallet.coin : wallet.gem, message: "Nhận thành công." });
     }
 }
