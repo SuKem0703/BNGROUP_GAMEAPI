@@ -9,6 +9,7 @@ import { ShopLog } from "../models/user/ShopLog";
 import { SaveData } from "../models/user/SaveData";
 import { ForumThread } from "../models/forum/ForumThread";
 import { ForumPost } from "../models/forum/ForumPost";
+import { FarmPlot } from "../models/user/FarmPlot";
 
 const getDbConfig = () => {
     const type = (process.env.DB_TYPE as any) || "mysql";
@@ -37,7 +38,8 @@ export const ApplicationDbContext = new DataSource({
         ShopLog,
         SaveData,
         ForumThread,
-        ForumPost
+        ForumPost,
+        FarmPlot
     ]
 });
 

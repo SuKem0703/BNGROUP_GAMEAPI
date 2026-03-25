@@ -11,6 +11,7 @@ import { PlayerStatsController } from '../controllers/PlayerStatsController';
 import { SaveDataController } from '../controllers/SaveDataController';
 import { ShopController } from '../controllers/ShopController';
 import { StorageController } from '../controllers/StorageController';
+import { FarmController } from '../controllers/FarmController';
 
 const router = Router();
 
@@ -75,6 +76,11 @@ router.post('/Storage/withdraw', authMiddleware, StorageController.withdrawItem)
 // Forum (Thao tác đăng bài/Bình luận)
 router.post('/Forum/Create', authMiddleware, ForumController.createThread);
 router.post('/Forum/Reply', authMiddleware, ForumController.reply);
+
+// Farm
+router.get('/Farm/sync', authMiddleware, FarmController.syncFarm);
+router.post('/Farm/plant', authMiddleware, FarmController.plantSeed);
+router.post('/Farm/harvest', authMiddleware, FarmController.harvestCrop);
 
 // SaveData Controller rác (nếu cần dùng)
 router.post('/SaveData/upload', authMiddleware, SaveDataController.uploadSaveData);
