@@ -60,7 +60,7 @@ router.post('/Inventory/remove', authMiddleware, InventoryController.removeItem)
 
 // PlayerStats
 router.get('/PlayerStats/profile', authMiddleware, PlayerStatsController.getProfile);
-router.post('/PlayerStats/distribute', authMiddleware, PlayerStatsController.distributePoint);
+router.post('/PlayerStats/distribute', authMiddleware, PlayerStatsController.distributePoints);
 router.post('/PlayerStats/reset', authMiddleware, PlayerStatsController.resetStats);
 router.post('/PlayerStats/add-exp', authMiddleware, PlayerStatsController.addExperience);
 

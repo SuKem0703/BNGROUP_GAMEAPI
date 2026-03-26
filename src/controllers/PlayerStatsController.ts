@@ -48,41 +48,61 @@ export class PlayerStatsController {
         });
     }
 
-    public static async distributePoint(req: Request, res: Response): Promise<void> {
+    public static async distributePoints(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
-        const { statType, amount = 1 } = req.body;
+        
+        const { str = 0, dex = 0, intStat = 0, con = 0 } = req.body;
+
+        if (str < 0 || dex < 0 || intStat < 0 || con < 0) {
+            res.status(400).json("Dữ liệu không hợp lệ! Phát hiện nghi vấn gian lận.");
+            return;
+        }
+
+        const totalCost = str + dex + intStat + con;
+
+        if (totalCost === 0) {
+            res.status(400).json("Không có điểm nào được cộng.");
+            return;
+        }
+
         const stats = await PlayerStatsController.getOrCreateStats(accountId);
 
-        if (stats.potentialPoints < amount) {
+        if (stats.potentialPoints < totalCost) {
             res.status(400).json("Không đủ điểm tiềm năng.");
             return;
         }
 
-        let success = false;
-        switch (statType.toUpperCase()) {
-            case "STR": stats.str += amount; success = true; break;
-            case "DEX": stats.dex += amount; success = true; break;
-            case "INT": stats.int += amount; success = true; break;
-            case "CON": stats.con += amount; success = true; break;
-        }
+        const maxAllowedPoints = 5 + (stats.level - 1) * 5;
+        
+        // Tổng tất cả điểm hiện có của user (Đã cộng + Chưa cộng)
+        const currentTotalPoints = stats.str + stats.dex + stats.int + stats.con + stats.potentialPoints;
 
-        if (success) {
-            stats.potentialPoints -= amount;
-            stats.updatedAt = new Date();
-            await ApplicationDbContext.getRepository(UserStat).save(stats);
-
-            res.status(200).json({
-                level: stats.level,
-                exp: stats.exp,
-                potentialPoints: stats.potentialPoints,
-                str: stats.str,
-                dex: stats.dex,
-                con: stats.con,
-                intStat: stats.int
-            });
+        // Nếu hacker đã dùng mánh khóe nào đó làm tổng điểm hiện tại vượt mức cho phép
+        if (currentTotalPoints > maxAllowedPoints) {
+            res.status(400).json("Phát hiện bất thường trong dữ liệu nhân vật!");
             return;
         }
-        res.status(400).json("Loại chỉ số không hợp lệ.");
+
+        stats.str += str;
+        stats.dex += dex;
+        stats.int += intStat;
+        stats.con += con;
+        
+        stats.potentialPoints -= totalCost;
+        stats.updatedAt = new Date();
+
+        await ApplicationDbContext.getRepository(UserStat).save(stats);
+
+        // Trả về dữ liệu mới nhất cho Client đồng bộ
+        res.status(200).json({
+            level: stats.level,
+            exp: stats.exp,
+            potentialPoints: stats.potentialPoints,
+            str: stats.str,
+            dex: stats.dex,
+            con: stats.con,
+            intStat: stats.int
+        });
     }
 
     public static async resetStats(req: Request, res: Response): Promise<void> {
