@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
+import { In } from "typeorm";
 import { ApplicationDbContext } from '../config/database';
 import { FarmPlot } from '../models/user/FarmPlot';
 import { TimeHelper } from '../utils/TimeHelper';
 
 export class FarmController {
-    // 1. Lấy toàn bộ nông trại của user
     public static async syncFarm(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
         const plots = await ApplicationDbContext.getRepository(FarmPlot).find({
@@ -18,7 +18,6 @@ export class FarmController {
         });
     }
 
-    // 2. Trồng cây
     public static async plantSeed(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
         const { plotId, seedItemId } = req.body;
@@ -42,30 +41,50 @@ export class FarmController {
         res.status(200).json({ success: true, plantedAt: plot.plantedAt });
     }
 
-    // 3. Thu hoạch (Hoặc Regrow)
     public static async harvestCrop(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
-        const { plotId, isRegrowable, offsetSeconds } = req.body;
+        const { actions } = req.body;
 
-        const repo = ApplicationDbContext.getRepository(FarmPlot);
-        const plot = await repo.findOne({ where: { accountId, plotId } });
-
-        if (!plot) {
-            res.status(404).json("Không tìm thấy dữ liệu ô đất.");
+        if (!actions || !Array.isArray(actions) || actions.length === 0) {
+            res.status(400).json("Danh sách thu hoạch trống.");
             return;
         }
 
-        if (isRegrowable) {
-            // Nếu cây nảy mầm lại, ta tịnh tiến thời gian PlantedAt lên hiện tại trừ đi thời gian nảy mầm
-            const newPlantedAt = TimeHelper.getVietnamTime();
-            newPlantedAt.setSeconds(newPlantedAt.getSeconds() - (offsetSeconds || 0));
-            plot.plantedAt = newPlantedAt;
-            await repo.save(plot);
-        } else {
-            // Nếu thu hoạch xong mất cây -> Xóa khỏi Database
-            await repo.remove(plot);
+        const repo = ApplicationDbContext.getRepository(FarmPlot);
+        
+        const plotIds = actions.map((a: any) => a.plotId);
+
+        const plots = await repo.find({
+            where: { accountId: accountId, plotId: In(plotIds) }
+        });
+
+        const plotsToRemove: FarmPlot[] = [];
+        const plotsToUpdate: FarmPlot[] = [];
+        const now = TimeHelper.getVietnamTime();
+
+        for (const action of actions) {
+            const plot = plots.find(p => p.plotId === action.plotId);
+            if (!plot) continue;
+
+            if (action.isRegrowable) {
+                const newPlantedAt = new Date(now.getTime());
+                newPlantedAt.setSeconds(newPlantedAt.getSeconds() - (action.offsetSeconds || 0));
+                plot.plantedAt = newPlantedAt;
+                plotsToUpdate.push(plot);
+            } else {
+                plotsToRemove.push(plot);
+            }
         }
 
-        res.status(200).json({ success: true });
+        await ApplicationDbContext.manager.transaction(async manager => {
+            if (plotsToUpdate.length > 0) {
+                await manager.save(plotsToUpdate);
+            }
+            if (plotsToRemove.length > 0) {
+                await manager.remove(plotsToRemove);
+            }
+        });
+
+        res.status(200).json({ success: true, processed: actions.length });
     }
 }

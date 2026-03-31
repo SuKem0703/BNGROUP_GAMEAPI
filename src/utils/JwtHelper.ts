@@ -2,7 +2,7 @@ import * as jwt from 'jsonwebtoken';
 import { TimeHelper } from './TimeHelper';
 
 export class JwtHelper {
-    public static generateToken(accountId: string, username: string, secretKey: string, issuer: string, audience: string): string {
+    public static generateToken(accountId: string, username: string, role: string, secretKey: string, issuer: string, audience: string): string {
         if (!secretKey || secretKey.length < 32) {
             throw new Error("JWT secret key must be at least 32 characters.");
         }
@@ -15,6 +15,7 @@ export class JwtHelper {
         const payload = {
             sub: username,
             accountId: accountId,
+            role: role,
             exp: expSeconds
         };
 

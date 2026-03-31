@@ -1,5 +1,6 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, OneToOne } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, OneToOne, ManyToOne, JoinColumn } from 'typeorm';
 import { SaveData } from './SaveData';
+import { Role, RoleType } from './Role';
 
 export enum AccountStatus {
     None = 0,
@@ -27,6 +28,13 @@ export class Account {
 
     @Column({ type: 'int', default: AccountStatus.None })
     status: AccountStatus = AccountStatus.None;
+
+    @ManyToOne(() => Role, { eager: true })
+    @JoinColumn({ name: 'roleId' })
+    role!: Role;
+
+    @Column({ type: 'int' })
+    roleId!: number;
 
     @OneToOne(() => SaveData, saveData => saveData.account)
     saveData?: SaveData;

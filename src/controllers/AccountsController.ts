@@ -3,6 +3,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { ApplicationDbContext } from '../config/database';
 import { Account, AccountStatus } from '../models/user/Account';
+import { Role, RoleType } from '../models/user/Role';
 import { SaveData } from '../models/user/SaveData';
 import { UserStat } from '../models/user/UserStat';
 import { UserCurrency } from '../models/user/UserCurrency';
@@ -38,6 +39,13 @@ export class AccountsController {
             }
 
             await ApplicationDbContext.manager.transaction(async (transactionalEntityManager) => {
+                // Lấy role Player mặc định
+                const roleRepo = transactionalEntityManager.getRepository(Role);
+                const playerRole = await roleRepo.findOne({ where: { name: RoleType.Player } });
+                if (!playerRole) {
+                    throw new Error("Role Player không tồn tại trong database.");
+                }
+
                 let success = false;
                 for (let retry = 0; retry < 5; retry++) {
                     const countToday = await transactionalEntityManager.count(Account) + 1;
@@ -55,6 +63,8 @@ export class AccountsController {
                         account.passwordHash = PasswordHasher.hash(password);
                         account.createdAt = now;
                         account.status = AccountStatus.None;
+                        account.role = playerRole;
+                        account.roleId = playerRole.id;
 
                         // Tạo SaveData từ file JSON
                         const saveData = new SaveData();
@@ -106,7 +116,8 @@ export class AccountsController {
         try {
             const accountRepo = ApplicationDbContext.getRepository(Account);
             const account = await accountRepo.findOne({
-                where: [{ username }, { email: username }]
+                where: [{ username }, { email: username }],
+                relations: ['role']
             });
 
             if (!account || !PasswordHasher.verify(password, account.passwordHash)) {
@@ -120,9 +131,9 @@ export class AccountsController {
             }
 
             // Thay vì dùng CookieAuth như .NET, ta dùng JWT cho API
-            const token = JwtHelper.generateToken(account.id!, account.username, process.env.JWT_SECRET || 'your_super_secret_key_needs_to_be_long', 'your_issuer', 'your_audience');
+            const token = JwtHelper.generateToken(account.id!, account.username, account.role.name, process.env.JWT_SECRET || 'your_super_secret_key_needs_to_be_long', 'your_issuer', 'your_audience');
 
-            res.status(200).json({ toke id, username: account.username, email: account.email });
+            res.status(200).json({ token, accountId: account.id, username: account.username });
         } catch (error: any) {
             res.status(500).json({ error: "Lỗi server" });
         }

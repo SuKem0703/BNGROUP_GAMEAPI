@@ -10,6 +10,7 @@ import { SaveData } from "../models/user/SaveData";
 import { ForumThread } from "../models/forum/ForumThread";
 import { ForumPost } from "../models/forum/ForumPost";
 import { FarmPlot } from "../models/user/FarmPlot";
+import { Role } from "../models/user/Role";
 
 const getDbConfig = () => {
     const type = (process.env.DB_TYPE as any) || "mysql";
@@ -27,7 +28,7 @@ const dbConfig = getDbConfig();
 
 export const ApplicationDbContext = new DataSource({
     ...dbConfig,
-    synchronize: false,
+    synchronize: true,
     logging: false,
     entities: [
         Account,
@@ -39,7 +40,8 @@ export const ApplicationDbContext = new DataSource({
         SaveData,
         ForumThread,
         ForumPost,
-        FarmPlot
+        FarmPlot,
+        Role
     ]
 });
 

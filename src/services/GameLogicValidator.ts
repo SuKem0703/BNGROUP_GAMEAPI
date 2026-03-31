@@ -1,4 +1,4 @@
-import { GameStatsViewModel } from '../models/GameStatsViewModel';
+import { GameStatsDTO } from '../DTO/GameStatsDTO';
 
 export class GameLogicValidator {
     public static getExpToNextLevel(level: number): number {
@@ -11,7 +11,7 @@ export class GameLogicValidator {
         }
     }
 
-    public static isStatPointsValid(stats: GameStatsViewModel): boolean {
+    public static isStatPointsValid(stats: GameStatsDTO): boolean {
         const basePoints = 5;
         const pointsPerLevel = 5;
 
@@ -21,7 +21,7 @@ export class GameLogicValidator {
         return currentTotalPoints <= expectedTotalPoints + 2;
     }
 
-    public static isHealthValid(stats: GameStatsViewModel): boolean {
+    public static isHealthValid(stats: GameStatsDTO): boolean {
         const baseMaxHP = 100 + (stats.con * 10);
         const maxPossibleHP = baseMaxHP * 5 + 5000;
 
@@ -31,7 +31,7 @@ export class GameLogicValidator {
         return true;
     }
 
-    public static isStaminaValid(stats: GameStatsViewModel): boolean {
+    public static isStaminaValid(stats: GameStatsDTO): boolean {
         return stats.currentStamina <= 500;
     }
 }

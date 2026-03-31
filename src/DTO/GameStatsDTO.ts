@@ -1,4 +1,4 @@
-export class GameStatsViewModel {
+export class GameStatsDTO {
     lvl!: number;
     exp!: number;
     coin!: number;

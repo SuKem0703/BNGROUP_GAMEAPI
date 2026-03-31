@@ -1,4 +1,4 @@
-export class LeaderboardViewModel {
+export class LeaderboardDTO {
     rank!: number;
     username!: string;
     level!: number;

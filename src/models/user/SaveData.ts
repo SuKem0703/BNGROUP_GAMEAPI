@@ -1,6 +1,17 @@
 import { Entity, PrimaryColumn, Column, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
 import { Account } from './Account';
 
+export enum SaveReason {
+    Manual,
+    AutoSave,
+    Checkpoint,
+    SceneTransition,
+    QuitGame,
+    QuestHandIn,
+    Death
+}
+
+
 @Entity('SaveData')
 export class SaveData {
     @PrimaryColumn({ type: 'varchar' })

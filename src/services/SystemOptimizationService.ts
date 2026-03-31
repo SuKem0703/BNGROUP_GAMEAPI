@@ -1,7 +1,7 @@
 import { ApplicationDbContext } from '../config/database';
 
 export class SystemOptimizationService {
-    private static readonly AppUrl = "https://chronicles-of-knight-and-mage.onrender.com/api/gamedata/ping";
+    private static readonly AppUrl = "http://localhost:8080/api/gamedata/ping";
     private timer?: NodeJS.Timeout;
 
     public start(): void {
