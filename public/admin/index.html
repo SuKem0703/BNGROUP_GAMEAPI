@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chronicles Admin</title>
+    <link rel="stylesheet" href="/admin/styles.css" />
+</head>
+<body>
+    <div class="background-glow glow-a"></div>
+    <div class="background-glow glow-b"></div>
+
+    <main class="layout">
+        <section class="hero">
+            <div>
+                <p class="eyebrow">Chronicles of Knight and Mage</p>
+                <h1>Admin Control Room</h1>
+                <p class="hero-copy">
+                    Quan sat tai khoan, xem save data, cap nhat coin gem va trang thai user ngay trong backend hien tai.
+                </p>
+            </div>
+            <form id="auth-form" class="secret-card">
+                <label for="admin-secret">Admin secret</label>
+                <div class="secret-row">
+                    <input id="admin-secret" type="password" placeholder="Nhap ADMIN_SECRET" autocomplete="current-password" />
+                    <button type="submit">Ket noi</button>
+                </div>
+                <p class="helper-text">Secret duoc luu trong localStorage cua trinh duyet nay.</p>
+                <p id="auth-message" class="message subtle"></p>
+            </form>
+        </section>
+
+        <section class="summary-grid" id="summary-grid">
+            <article class="summary-card">
+                <span class="summary-label">Tong user</span>
+                <strong id="summary-total">-</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">Dang hoat dong</span>
+                <strong id="summary-active">-</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">Canh bao</span>
+                <strong id="summary-warn">-</strong>
+            </article>
+            <article class="summary-card danger">
+                <span class="summary-label">Bi cam</span>
+                <strong id="summary-ban">-</strong>
+            </article>
+        </section>
+
+        <section class="workspace">
+            <div class="panel list-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Danh sach nguoi choi</h2>
+                        <p id="list-caption">Nhap secret de tai du lieu.</p>
+                    </div>
+                    <button id="refresh-button" class="ghost-button" type="button">Tai lai</button>
+                </div>
+
+                <label class="search-label" for="search-input">Tim theo id, username, email</label>
+                <input id="search-input" class="search-input" type="search" placeholder="vd: admin, player01, gmail..." />
+
+                <div id="user-list" class="user-list"></div>
+            </div>
+
+            <div class="panel detail-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Chi tiet tai khoan</h2>
+                        <p id="detail-caption">Chon mot user ben trai de xem chi tiet.</p>
+                    </div>
+                </div>
+
+                <div id="empty-state" class="empty-state">
+                    Chua co user nao duoc chon.
+                </div>
+
+                <div id="detail-view" class="detail-view hidden">
+                    <section class="detail-card">
+                        <div class="detail-heading">
+                            <div>
+                                <p class="eyebrow">Thong tin co ban</p>
+                                <h3 id="detail-name">-</h3>
+                            </div>
+                            <span id="detail-status-badge" class="status-badge">-</span>
+                        </div>
+
+                        <div class="metric-grid">
+                            <div class="metric">
+                                <span>Account ID</span>
+                                <strong id="detail-account-id">-</strong>
+                            </div>
+                            <div class="metric">
+                                <span>Email</span>
+                                <strong id="detail-email">-</strong>
+                            </div>
+                            <div class="metric">
+                                <span>Created</span>
+                                <strong id="detail-created">-</strong>
+                            </div>
+                            <div class="metric">
+                                <span>Last save</span>
+                                <strong id="detail-last-save">-</strong>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="form-grid">
+                        <form id="status-form" class="detail-card">
+                            <div class="card-title-row">
+                                <h3>Trang thai user</h3>
+                                <p>0 None, 1 Warn, 2 Ban, 3 Unbanned</p>
+                            </div>
+                            <select id="status-select">
+                                <option value="0">None</option>
+                                <option value="1">Warn</option>
+                                <option value="2">Ban</option>
+                                <option value="3">Unbanned</option>
+                            </select>
+                            <button type="submit">Cap nhat status</button>
+                        </form>
+
+                        <form id="currency-form" class="detail-card">
+                            <div class="card-title-row">
+                                <h3>Coin va Gem</h3>
+                                <p>Cap nhat truc tiep vi tien cua tai khoan.</p>
+                            </div>
+                            <div class="two-column">
+                                <label>
+                                    <span>Coin</span>
+                                    <input id="coin-input" type="number" min="0" step="1" />
+                                </label>
+                                <label>
+                                    <span>Gem</span>
+                                    <input id="gem-input" type="number" min="0" step="1" />
+                                </label>
+                            </div>
+                            <button type="submit">Luu vi tien</button>
+                        </form>
+                    </section>
+
+                    <section class="detail-card">
+                        <div class="card-title-row">
+                            <h3>Player stats</h3>
+                            <p>Du lieu tu bang UserStats.</p>
+                        </div>
+                        <div id="stats-grid" class="metric-grid compact"></div>
+                    </section>
+
+                    <section class="detail-card">
+                        <div class="card-title-row">
+                            <h3>Hoat dong</h3>
+                            <p>Tong hop nhanh tu inventory, storage, farm, forum.</p>
+                        </div>
+                        <div id="activity-grid" class="metric-grid compact"></div>
+                    </section>
+
+                    <section class="detail-card">
+                        <div class="card-title-row">
+                            <h3>Save data</h3>
+                            <p>JSON da parse va raw text de debug nhanh.</p>
+                        </div>
+                        <div class="save-grid">
+                            <div>
+                                <h4>Parsed</h4>
+                                <pre id="save-parsed" class="code-block"></pre>
+                            </div>
+                            <div>
+                                <h4>Raw</h4>
+                                <pre id="save-raw" class="code-block"></pre>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/admin/app.js" defer></script>
+</body>
+</html>

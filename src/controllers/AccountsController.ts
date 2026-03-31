@@ -105,7 +105,9 @@ export class AccountsController {
 
         try {
             const accountRepo = ApplicationDbContext.getRepository(Account);
-            const account = await accountRepo.findOne({ where: { username } });
+            const account = await accountRepo.findOne({
+                where: [{ username }, { email: username }]
+            });
 
             if (!account || !PasswordHasher.verify(password, account.passwordHash)) {
                 res.status(401).json({ error: 'Sai thông tin đăng nhập!' });
@@ -120,7 +122,7 @@ export class AccountsController {
             // Thay vì dùng CookieAuth như .NET, ta dùng JWT cho API
             const token = JwtHelper.generateToken(account.id!, account.username, process.env.JWT_SECRET || 'your_super_secret_key_needs_to_be_long', 'your_issuer', 'your_audience');
 
-            res.status(200).json({ token, accountId: account.id, username: account.username });
+            res.status(200).json({ toke id, username: account.username, email: account.email });
         } catch (error: any) {
             res.status(500).json({ error: "Lỗi server" });
         }

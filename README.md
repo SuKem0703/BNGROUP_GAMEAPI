@@ -1,25 +1,37 @@
-# ⚔️ Chronicles of Knight and Mage - Game API (Node.js)
+# Chronicles of Knight and Mage - Game API (Node.js)
 
-> An alternative, lightweight backend implementation for the 2D RPG "Chronicles of Knight and Mage", built with **Node.js**. This project was developed to benchmark performance and experiment with different server-side architectures.
+An alternative, lightweight backend implementation for the 2D RPG "Chronicles of Knight and Mage", built with Node.js.
 
-## 🛠️ Tech Stack
-* **Environment:** Node.js
-* **Framework:** Express.js
-* **Database:** MySQL
-* **Authentication:** JWT
+## Tech Stack
+- Node.js
+- Express.js
+- TypeORM
+- MySQL
+- JWT
 
-## 🛡️ Security & Configuration Note
-*To maintain strict security standards, the `.env` file containing database credentials and secret keys is intentionally excluded from this repository via `.gitignore`.*
-* Please refer to the `.env.example` file for the required configuration structure.
-* **Production Deployment:** Configurations are securely injected via OS Environment Variables.
+## Configuration
+Copy `.env.example` to `.env` and update the values for your machine.
 
-## ✨ Key Technical Highlights
-* **Performance Benchmarking:** Developed as a parallel service to the ASP.NET Core version to analyze Node.js asynchronous event-driven performance.
-* **RESTful Design:** Clean, stateless API endpoints for game client communication.
-* **Data Validation:** Strict payload validation to ensure game state integrity.
+Important keys:
+- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
+- `JWT_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE`
+- `ADMIN_SECRET` for the new admin UI
 
-## 🚀 How to Run Locally
-1. Clone the repository: `git clone https://github.com/SuKem0703/BNGROUP_GAMEAPI.git`
-2. Run `npm install` to install dependencies.
-3. Duplicate `.env.example`, rename it to `.env`, and fill in your local database credentials.
-4. Run `npm start` (or `npm run dev`) to launch the API.
+## How to Run Locally
+1. Clone the repository.
+2. Run `npm install`.
+3. Create `.env` from `.env.example`.
+4. Ensure your MySQL server is running.
+5. Run `npm run build`.
+6. Run `npm start`.
+
+API base URL:
+- `http://localhost:8080/api`
+
+Admin UI:
+- `http://localhost:8080/admin`
+
+## Notes
+- The server auto-creates the database when `DB_TYPE=mysql`.
+- TypeORM uses `synchronize: true`, so tables are auto-created/updated for local development.
+- The admin UI uses the `x-admin-secret` header internally and reads its value from the browser login form.
