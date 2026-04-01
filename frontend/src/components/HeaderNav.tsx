@@ -3,6 +3,7 @@ import { cn } from '@/utils/classNames';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/leaderboard', label: 'Leaderboard' },
   { to: '/forum', label: 'Forum' },
 ];
 

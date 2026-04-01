@@ -28,7 +28,7 @@ const dbConfig = getDbConfig();
 
 export const ApplicationDbContext = new DataSource({
     ...dbConfig,
-    synchronize: true,
+    synchronize: false,
     logging: false,
     entities: [
         Account,

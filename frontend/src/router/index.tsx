@@ -6,6 +6,7 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { ForumCreatePage } from '@/pages/ForumCreatePage';
 import { ForumDetailPage } from '@/pages/ForumDetailPage';
 import { ForumListPage } from '@/pages/ForumListPage';
+import { LeaderboardPage } from '@/pages/LeaderboardPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { RegisterPage } from '@/pages/RegisterPage';
@@ -60,6 +61,7 @@ export const appRouter = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
+          { path: '/leaderboard', element: <LeaderboardPage /> },
           { path: '/forum/create', element: <ForumCreatePage /> },
         ],
       },

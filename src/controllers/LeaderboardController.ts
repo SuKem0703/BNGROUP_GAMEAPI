@@ -5,7 +5,6 @@ import { UserStat } from '../models/user/UserStat';
 import { UserCurrency } from '../models/user/UserCurrency';
 
 export class LeaderboardController {
-    // Để tối ưu, nên lưu cache kết quả này lại trong khoảng 5 phút giống C#
     public static async getLeaderboard(req: Request, res: Response): Promise<void> {
         try {
             const accounts = await ApplicationDbContext.getRepository(Account).find({ where: { status: AccountStatus.None } });

@@ -60,6 +60,9 @@ export function DashboardPage() {
             <Link className="btn-secondary" to="/forum">
               Browse forum
             </Link>
+            <Link className="btn-secondary" to="/leaderboard">
+              View leaderboard
+            </Link>
           </>
         }
       />
