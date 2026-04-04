@@ -97,7 +97,11 @@ export function normalizeApiError(
   error: unknown,
   fallback = 'Something went wrong. Please try again.',
 ) {
-  if (error instanceof Error && 'status' in error) {
+  if (
+    error instanceof Error &&
+    'status' in error &&
+    !(isRecord(error) && 'response' in error)
+  ) {
     return error;
   }
 
@@ -140,6 +144,7 @@ export function normalizeAuthResponse(
   const userId = getString(userSource, ['accountId', 'id', 'userId']);
   const username = getString(userSource, ['username', 'name'], fallbackIdentity);
   const email = getString(userSource, ['email'], '');
+  const role = getString(userSource, ['role'], 'Player');
 
   return {
     token,
@@ -149,6 +154,7 @@ export function normalizeAuthResponse(
             id: userId || username,
             username: username || fallbackIdentity || 'Adventurer',
             email: email || null,
+            role: role || 'Player',
           }
         : null,
     message: getString(source, ['message']),

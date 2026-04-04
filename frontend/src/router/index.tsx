@@ -1,11 +1,15 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { ProtectedRoute, PublicOnlyRoute } from '@/components/ProtectedRoute';
+import { AdminRoute, ProtectedRoute, PublicOnlyRoute } from '@/components/ProtectedRoute';
 import { AppShell } from '@/layouts/AppShell';
 import { AuthLayout } from '@/layouts/AuthLayout';
+import { AdminForumPage } from '@/pages/AdminForumPage';
+import { AdminGiftCodesPage } from '@/pages/AdminGiftCodesPage';
+import { AdminUsersPage } from '@/pages/AdminUsersPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ForumCreatePage } from '@/pages/ForumCreatePage';
 import { ForumDetailPage } from '@/pages/ForumDetailPage';
 import { ForumListPage } from '@/pages/ForumListPage';
+import { GiftCodePage } from '@/pages/GiftCodePage';
 import { LeaderboardPage } from '@/pages/LeaderboardPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
@@ -61,8 +65,25 @@ export const appRouter = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
+          { path: '/giftcodes', element: <GiftCodePage /> },
           { path: '/leaderboard', element: <LeaderboardPage /> },
           { path: '/forum/create', element: <ForumCreatePage /> },
+        ],
+      },
+    ],
+  },
+  {
+    element: <AdminRoute />,
+    errorElement: <RouteErrorPage />,
+    children: [
+      {
+        element: <AppShell />,
+        errorElement: <RouteErrorPage />,
+        children: [
+          { path: '/admin', element: <Navigate replace to="/admin/users" /> },
+          { path: '/admin/users', element: <AdminUsersPage /> },
+          { path: '/admin/forum', element: <AdminForumPage /> },
+          { path: '/admin/giftcodes', element: <AdminGiftCodesPage /> },
         ],
       },
     ],

@@ -14,11 +14,11 @@ const frontendIndexPath = path.join(frontendPath, 'index.html');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
-app.use('/admin', express.static(adminPath));
+app.use('/admin-panel', express.static(adminPath));
 app.use('/api', routes);
 app.use(express.static(frontendPath));
 
-app.get(/^\/(?!api|admin).*/, (req, res, next) => {
+app.get(/^\/(?!api|admin-panel).*/, (req, res, next) => {
     if (!fs.existsSync(frontendIndexPath)) {
         next();
         return;

@@ -7,6 +7,7 @@ import { AccountsController } from '../controllers/AccountsController';
 import { EconomyController } from '../controllers/EconomyController';
 import { ForumController } from '../controllers/ForumController';
 import { GameDataController } from '../controllers/GameDataController';
+import { GiftCodeController } from '../controllers/GiftCodeController';
 import { InventoryController } from '../controllers/InventoryController';
 import { LeaderboardController } from '../controllers/LeaderboardController';
 import { PlayerStatsController } from '../controllers/PlayerStatsController';
@@ -30,9 +31,20 @@ router.get('/Forum/Details/:id', ForumController.getThreadDetails);
 router.get('/Admin/dashboard', adminMiddleware, AdminController.getDashboard);
 router.get('/Admin/users/:accountId', adminMiddleware, AdminController.getUserDetail);
 router.patch('/Admin/users/:accountId/status', adminMiddleware, AdminController.updateStatus);
+router.patch('/Admin/users/:accountId/role', adminMiddleware, AdminController.updateRole);
 router.patch('/Admin/users/:accountId/currency', adminMiddleware, AdminController.updateCurrency);
+router.get('/Admin/forum', adminMiddleware, AdminController.getForumDashboard);
+router.get('/Admin/forum/threads/:threadId', adminMiddleware, AdminController.getForumThreadDetail);
+router.delete('/Admin/forum/threads/:threadId', adminMiddleware, AdminController.deleteForumThread);
+router.delete('/Admin/forum/posts/:postId', adminMiddleware, AdminController.deleteForumPost);
+router.get('/Admin/giftcodes', adminMiddleware, AdminController.getGiftCodes);
+router.post('/Admin/giftcodes', adminMiddleware, AdminController.createGiftCode);
+router.patch('/Admin/giftcodes/:giftCodeId/state', adminMiddleware, AdminController.updateGiftCodeState);
+router.delete('/Admin/giftcodes/:giftCodeId', adminMiddleware, AdminController.deleteGiftCode);
 
 router.get('/Accounts/Dashboard', authMiddleware, AccountsController.dashboard);
+router.get('/GiftCodes/live', authMiddleware, GiftCodeController.getLiveGiftCodes);
+router.post('/GiftCodes/redeem', authMiddleware, GiftCodeController.redeem);
 
 router.get('/GameData/get-save', authMiddleware, GameDataController.getSaveData);
 router.post('/GameData/save-data', authMiddleware, GameDataController.saveGameData);

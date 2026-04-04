@@ -11,6 +11,9 @@ import { ForumThread } from "../models/forum/ForumThread";
 import { ForumPost } from "../models/forum/ForumPost";
 import { FarmPlot } from "../models/user/FarmPlot";
 import { Role } from "../models/user/Role";
+import { GiftCode } from "../models/giftcode/GiftCode";
+import { GiftCodeReward } from "../models/giftcode/GiftCodeReward";
+import { GiftCodeRedemption } from "../models/giftcode/GiftCodeRedemption";
 
 const getDbConfig = () => {
     const type = (process.env.DB_TYPE as any) || "mysql";
@@ -41,9 +44,72 @@ export const ApplicationDbContext = new DataSource({
         ForumThread,
         ForumPost,
         FarmPlot,
-        Role
+        Role,
+        GiftCode,
+        GiftCodeReward,
+        GiftCodeRedemption
     ]
 });
+
+const ensureGiftCodeSchema = async () => {
+    if (ApplicationDbContext.options.type !== "mysql") {
+        return;
+    }
+
+    await ApplicationDbContext.query(`
+        CREATE TABLE IF NOT EXISTS GiftCodes (
+            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            code VARCHAR(80) NOT NULL,
+            title VARCHAR(180) NULL,
+            description TEXT NULL,
+            isUnlimitedQuantity TINYINT(1) NOT NULL DEFAULT 1,
+            maxRedemptions INT NULL,
+            redeemedCount INT NOT NULL DEFAULT 0,
+            isUnlimitedDuration TINYINT(1) NOT NULL DEFAULT 1,
+            expiresAt DATETIME NULL,
+            isActive TINYINT(1) NOT NULL DEFAULT 1,
+            publishToForum TINYINT(1) NOT NULL DEFAULT 0,
+            forumThreadId INT NULL,
+            createdByAccountId VARCHAR(255) NULL,
+            createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY UQ_GiftCodes_Code (code)
+        )
+    `);
+
+    await ApplicationDbContext.query(`
+        CREATE TABLE IF NOT EXISTS GiftCodeRewards (
+            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            giftCodeId INT NOT NULL,
+            itemId INT NOT NULL,
+            quantity INT NOT NULL DEFAULT 1,
+            rarity INT NOT NULL DEFAULT 1,
+            qualityFactor FLOAT NOT NULL DEFAULT 1,
+            KEY IDX_GiftCodeRewards_GiftCodeId (giftCodeId),
+            CONSTRAINT FK_GiftCodeRewards_GiftCode
+                FOREIGN KEY (giftCodeId) REFERENCES GiftCodes(id)
+                ON DELETE CASCADE
+        )
+    `);
+
+    await ApplicationDbContext.query(`
+        CREATE TABLE IF NOT EXISTS GiftCodeRedemptions (
+            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            giftCodeId INT NOT NULL,
+            accountId VARCHAR(255) NOT NULL,
+            redeemedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY UQ_GiftCodeRedemptions_GiftCode_Account (giftCodeId, accountId),
+            KEY IDX_GiftCodeRedemptions_GiftCodeId (giftCodeId),
+            KEY IDX_GiftCodeRedemptions_AccountId (accountId),
+            CONSTRAINT FK_GiftCodeRedemptions_GiftCode
+                FOREIGN KEY (giftCodeId) REFERENCES GiftCodes(id)
+                ON DELETE CASCADE,
+            CONSTRAINT FK_GiftCodeRedemptions_Account
+                FOREIGN KEY (accountId) REFERENCES Accounts(id)
+                ON DELETE CASCADE
+        )
+    `);
+};
 
 export const initializeDatabase = async () => {
     const config = getDbConfig();
@@ -72,6 +138,7 @@ export const initializeDatabase = async () => {
         }
 
         await ApplicationDbContext.initialize();
+        await ensureGiftCodeSchema();
 
         console.log("===== CONNECTED DB =====");
         console.log(ApplicationDbContext.options.database);

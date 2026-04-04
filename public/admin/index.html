@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chronicles Admin</title>
-    <link rel="stylesheet" href="/admin/styles.css" />
+    <link rel="stylesheet" href="/admin-panel/styles.css" />
 </head>
 <body>
     <div class="background-glow glow-a"></div>
@@ -16,7 +16,7 @@
                 <p class="eyebrow">Chronicles of Knight and Mage</p>
                 <h1>Admin Control Room</h1>
                 <p class="hero-copy">
-                    Quan sat tai khoan, xem save data, cap nhat coin gem va trang thai user ngay trong backend hien tai.
+                    Quan ly nguoi choi, forum, giftcode va thong bao giftcode len forum ngay trong bang dieu khien admin.
                 </p>
             </div>
             <form id="auth-form" class="secret-card">
@@ -47,6 +47,14 @@
                 <span class="summary-label">Bi cam</span>
                 <strong id="summary-ban">-</strong>
             </article>
+            <article class="summary-card">
+                <span class="summary-label">Threads</span>
+                <strong id="summary-threads">-</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">GiftCodes active</span>
+                <strong id="summary-giftcodes">-</strong>
+            </article>
         </section>
 
         <section class="workspace">
@@ -59,7 +67,7 @@
                     <button id="refresh-button" class="ghost-button" type="button">Tai lai</button>
                 </div>
 
-                <label class="search-label" for="search-input">Tim theo id, username, email</label>
+                <label class="search-label" for="search-input">Tim theo id, username, email, role</label>
                 <input id="search-input" class="search-input" type="search" placeholder="vd: admin, player01, gmail..." />
 
                 <div id="user-list" class="user-list"></div>
@@ -84,7 +92,10 @@
                                 <p class="eyebrow">Thong tin co ban</p>
                                 <h3 id="detail-name">-</h3>
                             </div>
-                            <span id="detail-status-badge" class="status-badge">-</span>
+                            <div class="detail-badges">
+                                <span id="detail-role-badge" class="role-badge">-</span>
+                                <span id="detail-status-badge" class="status-badge">-</span>
+                            </div>
                         </div>
 
                         <div class="metric-grid">
@@ -107,7 +118,7 @@
                         </div>
                     </section>
 
-                    <section class="form-grid">
+                    <section class="form-grid form-grid-wide">
                         <form id="status-form" class="detail-card">
                             <div class="card-title-row">
                                 <h3>Trang thai user</h3>
@@ -120,6 +131,19 @@
                                 <option value="3">Unbanned</option>
                             </select>
                             <button type="submit">Cap nhat status</button>
+                        </form>
+
+                        <form id="role-form" class="detail-card">
+                            <div class="card-title-row">
+                                <h3>Role</h3>
+                                <p>Dieu chinh quyen truy cap cua tai khoan.</p>
+                            </div>
+                            <select id="role-select">
+                                <option value="Player">Player</option>
+                                <option value="Contributor">Contributor</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                            <button type="submit">Cap nhat role</button>
                         </form>
 
                         <form id="currency-form" class="detail-card">
@@ -152,7 +176,7 @@
                     <section class="detail-card">
                         <div class="card-title-row">
                             <h3>Hoat dong</h3>
-                            <p>Tong hop nhanh tu inventory, storage, farm, forum.</p>
+                            <p>Tong hop nhanh tu inventory, storage, farm, forum va giftcode.</p>
                         </div>
                         <div id="activity-grid" class="metric-grid compact"></div>
                     </section>
@@ -176,8 +200,155 @@
                 </div>
             </div>
         </section>
+
+        <section class="workspace workspace-secondary">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Forum moderation</h2>
+                        <p id="forum-caption">Danh sach thread va reply de kiem duyet.</p>
+                    </div>
+                    <button id="forum-refresh-button" class="ghost-button" type="button">Tai lai</button>
+                </div>
+
+                <label class="search-label" for="forum-search-input">Tim theo tieu de, noi dung, tac gia</label>
+                <input id="forum-search-input" class="search-input" type="search" placeholder="vd: giftcode, admin, event..." />
+
+                <div class="moderation-grid">
+                    <div id="forum-thread-list" class="user-list"></div>
+
+                    <div class="detail-card">
+                        <div id="forum-empty-state" class="empty-state compact-empty-state">
+                            Chon mot thread de xem chi tiet va quan ly bai viet.
+                        </div>
+
+                        <div id="forum-detail-view" class="detail-view hidden">
+                            <div class="card-title-row">
+                                <div>
+                                    <p class="eyebrow">Thread detail</p>
+                                    <h3 id="forum-thread-title">-</h3>
+                                </div>
+                                <div class="action-row">
+                                    <a id="forum-open-link" class="ghost-link" target="_blank" rel="noreferrer">Mo public page</a>
+                                    <button id="forum-delete-thread-button" class="danger-button" type="button">Xoa thread</button>
+                                </div>
+                            </div>
+
+                            <div class="metric-grid">
+                                <div class="metric">
+                                    <span>Tac gia</span>
+                                    <strong id="forum-thread-author">-</strong>
+                                </div>
+                                <div class="metric">
+                                    <span>Created</span>
+                                    <strong id="forum-thread-created">-</strong>
+                                </div>
+                                <div class="metric">
+                                    <span>Views</span>
+                                    <strong id="forum-thread-views">-</strong>
+                                </div>
+                                <div class="metric">
+                                    <span>Replies</span>
+                                    <strong id="forum-thread-replies">-</strong>
+                                </div>
+                            </div>
+
+                            <div class="thread-content">
+                                <h4>Noi dung</h4>
+                                <pre id="forum-thread-content" class="code-block compact-code"></pre>
+                            </div>
+
+                            <div>
+                                <div class="card-title-row">
+                                    <h4>Replies</h4>
+                                    <p id="forum-post-caption">0 replies</p>
+                                </div>
+                                <div id="forum-post-list" class="post-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>GiftCode management</h2>
+                        <p id="giftcode-caption">Quan ly code, gioi han luot su dung va dang thong bao len forum.</p>
+                    </div>
+                    <button id="giftcode-refresh-button" class="ghost-button" type="button">Tai lai</button>
+                </div>
+
+                <form id="giftcode-form" class="detail-card">
+                    <div class="card-title-row">
+                        <div>
+                            <h3>Tao giftcode moi</h3>
+                            <p>Item reward duoc xac dinh theo item ID. Trang bi luon quantity = 1.</p>
+                        </div>
+                        <button id="add-reward-button" class="ghost-button" type="button">Them reward</button>
+                    </div>
+
+                    <div class="two-column">
+                        <label>
+                            <span>Giftcode</span>
+                            <input id="giftcode-code-input" type="text" placeholder="SPRING-2026" />
+                        </label>
+                        <label>
+                            <span>Tieu de</span>
+                            <input id="giftcode-title-input" type="text" placeholder="Spring event pack" />
+                        </label>
+                    </div>
+
+                    <label>
+                        <span>Mo ta</span>
+                        <textarea id="giftcode-description-input" rows="3" placeholder="Mo ta ngan cho forum va dashboard"></textarea>
+                    </label>
+
+                    <div class="toggle-grid">
+                        <label class="toggle-card">
+                            <input id="giftcode-unlimited-quantity" type="checkbox" checked />
+                            <span>Khong gioi han so luong</span>
+                        </label>
+                        <label class="toggle-card">
+                            <input id="giftcode-unlimited-duration" type="checkbox" checked />
+                            <span>Khong gioi han thoi gian</span>
+                        </label>
+                        <label class="toggle-card">
+                            <input id="giftcode-publish-forum" type="checkbox" checked />
+                            <span>Dang thong bao len forum</span>
+                        </label>
+                    </div>
+
+                    <div class="two-column">
+                        <label>
+                            <span>So luong toi da</span>
+                            <input id="giftcode-max-redemptions" type="number" min="1" step="1" disabled />
+                        </label>
+                        <label>
+                            <span>Het han luc</span>
+                            <input id="giftcode-expires-at" type="datetime-local" disabled />
+                        </label>
+                    </div>
+
+                    <div class="reward-help">
+                        <strong>Resource ID guide:</strong>
+                        <span>101-1199 equipment/accessories, 1201-1299 seed, 1301-1399 crop, 1401-1499 material.</span>
+                    </div>
+
+                    <div id="rewards-container" class="reward-list"></div>
+                    <p id="giftcode-message" class="message subtle"></p>
+
+                    <button type="submit">Tao giftcode</button>
+                </form>
+
+                <label class="search-label" for="giftcode-search-input">Tim giftcode theo ma, tieu de, mo ta</label>
+                <input id="giftcode-search-input" class="search-input" type="search" placeholder="vd: spring, event, starter..." />
+
+                <div id="giftcode-list" class="giftcode-list"></div>
+            </div>
+        </section>
     </main>
 
-    <script src="/admin/app.js" defer></script>
+    <script src="/admin-panel/app.js" defer></script>
 </body>
 </html>

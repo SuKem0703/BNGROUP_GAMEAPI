@@ -1,4 +1,5 @@
 import { LogOut, ScrollText, ShieldHalf } from 'lucide-react';
+import { RoleBadge } from '@/components/RoleBadge';
 import { useNavigate } from 'react-router-dom';
 import { HeaderNav } from '@/components/HeaderNav';
 import { useAuthStore } from '@/store/auth-store';
@@ -29,9 +30,12 @@ export function Topbar() {
         <div className="flex flex-wrap items-center gap-3">
           {!hasHydrated ? null : isLoggedIn ? (
             <>
-              <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
-                Signed in as{' '}
-                <span className="font-semibold text-white">{user?.username ?? 'Adventurer'}</span>
+              <div className="flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300">
+                <span>
+                  Signed in as{' '}
+                  <span className="font-semibold text-white">{user?.username ?? 'Adventurer'}</span>
+                </span>
+                <RoleBadge role={user?.role} />
               </div>
               <button
                 className="btn-secondary px-4 py-2 text-sm"
@@ -41,6 +45,16 @@ export function Topbar() {
                 <ScrollText className="h-4 w-4" />
                 Create Thread
               </button>
+              {user?.role === 'Admin' ? (
+                <button
+                  className="btn-secondary px-4 py-2 text-sm"
+                  onClick={() => navigate('/admin')}
+                  type="button"
+                >
+                  <ShieldHalf className="h-4 w-4" />
+                  Admin
+                </button>
+              ) : null}
               <button
                 className="btn-secondary px-4 py-2 text-sm text-rose-100 hover:border-rose-400/25 hover:bg-rose-500/10"
                 onClick={() => {

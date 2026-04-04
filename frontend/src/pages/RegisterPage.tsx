@@ -78,6 +78,9 @@ export function RegisterPage() {
         </span>
       }
     >
+      <div className="rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-slate-300">
+        Newly created accounts start with the default <span className="font-semibold text-white">Player</span> access tier unless changed by an administrator later.
+      </div>
       <form
         className="space-y-5"
         onSubmit={(event) => {

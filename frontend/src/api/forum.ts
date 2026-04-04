@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/axios';
-import type { CreateThreadPayload } from '@/types/forum';
+import type { CreateReplyPayload, CreateThreadPayload } from '@/types/forum';
 import {
   normalizeForumDetail,
   normalizeForumThreads,
@@ -26,5 +26,17 @@ export async function createForumThread(payload: CreateThreadPayload) {
       typeof data.message === 'string'
         ? data.message
         : 'Thread created successfully.',
+  };
+}
+
+export async function createForumReply(payload: CreateReplyPayload) {
+  const response = await apiClient.post('/Forum/Reply', payload);
+  const data = unwrapPayload<Record<string, unknown>>(response.data);
+
+  return {
+    message:
+      typeof data.message === 'string'
+        ? data.message
+        : 'Reply posted successfully.',
   };
 }

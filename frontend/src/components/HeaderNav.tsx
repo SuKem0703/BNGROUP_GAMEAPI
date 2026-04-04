@@ -1,16 +1,21 @@
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/utils/classNames';
+import { useAuthStore } from '@/store/auth-store';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/giftcodes', label: 'GiftCodes' },
   { to: '/leaderboard', label: 'Leaderboard' },
   { to: '/forum', label: 'Forum' },
 ];
 
 export function HeaderNav() {
+  const role = useAuthStore((state) => state.user?.role);
+  const items = role === 'Admin' ? [...navItems, { to: '/admin', label: 'Admin' }] : navItems;
+
   return (
     <nav className="flex flex-wrap items-center gap-2">
-      {navItems.map((item) => (
+      {items.map((item) => (
         <NavLink
           key={item.to}
           className={({ isActive }) =>

@@ -8,6 +8,8 @@
     --accent: #0f766e;
     --accent-strong: #115e59;
     --danger: #b42318;
+    --warning: #b45309;
+    --info: #1d4ed8;
     --shadow: 0 20px 50px rgba(64, 43, 16, 0.14);
     --radius: 24px;
 }
@@ -52,7 +54,7 @@ body {
 }
 
 .layout {
-    width: min(1400px, calc(100vw - 32px));
+    width: min(1500px, calc(100vw - 32px));
     margin: 0 auto;
     padding: 40px 0 48px;
 }
@@ -69,6 +71,15 @@ body {
     margin-bottom: 24px;
 }
 
+.workspace {
+    grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+}
+
+.workspace-secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 24px;
+}
+
 .eyebrow {
     margin: 0 0 8px;
     font-size: 0.82rem;
@@ -81,7 +92,8 @@ h1,
 h2,
 h3,
 h4,
-p {
+p,
+pre {
     margin: 0;
 }
 
@@ -115,13 +127,22 @@ h1 {
     padding: 22px;
 }
 
-.secret-card {
+.secret-card,
+.detail-card,
+.detail-view,
+.giftcode-list,
+.reward-list,
+.post-list {
     display: grid;
-    gap: 12px;
+    gap: 16px;
 }
 
 .secret-row,
-.two-column {
+.two-column,
+.toggle-grid,
+.moderation-grid,
+.detail-badges,
+.action-row {
     display: grid;
     gap: 12px;
 }
@@ -130,14 +151,37 @@ h1 {
     grid-template-columns: 1fr auto;
 }
 
+.two-column,
+.toggle-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.toggle-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.moderation-grid {
+    grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+    align-items: start;
+}
+
+.detail-badges,
+.action-row {
+    grid-auto-flow: column;
+    align-items: center;
+    justify-content: start;
+}
+
 input,
 select,
+textarea,
 button {
     font: inherit;
 }
 
 input,
-select {
+select,
+textarea {
     width: 100%;
     padding: 13px 14px;
     border-radius: 14px;
@@ -146,23 +190,37 @@ select {
     color: var(--text);
 }
 
-button {
+textarea {
+    resize: vertical;
+    min-height: 96px;
+}
+
+button,
+.ghost-link {
     border: 0;
     border-radius: 14px;
     padding: 13px 18px;
     cursor: pointer;
     background: linear-gradient(135deg, var(--accent) 0%, #0f766e 100%);
     color: white;
-    transition: transform 140ms ease, opacity 140ms ease;
+    transition: transform 140ms ease, opacity 140ms ease, background 140ms ease;
+    text-decoration: none;
 }
 
-button:hover {
+button:hover,
+.ghost-link:hover {
     transform: translateY(-1px);
 }
 
-.ghost-button {
+.ghost-button,
+.ghost-link {
     background: rgba(15, 118, 110, 0.12);
     color: var(--accent-strong);
+}
+
+.danger-button {
+    background: rgba(180, 35, 24, 0.12);
+    color: var(--danger);
 }
 
 .helper-text,
@@ -170,13 +228,16 @@ button:hover {
 .panel-header p,
 .card-title-row p,
 .search-label,
-.summary-label {
+.summary-label,
+.reward-help,
+.thread-card p,
+.giftcode-meta {
     color: var(--muted);
 }
 
 .summary-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -195,17 +256,15 @@ button:hover {
     color: var(--danger);
 }
 
-.workspace {
-    grid-template-columns: minmax(320px, 440px) minmax(0, 1fr);
-}
-
 .panel {
     min-height: 620px;
 }
 
 .panel-header,
 .detail-heading,
-.card-title-row {
+.card-title-row,
+.thread-card-header,
+.giftcode-card-header {
     display: flex;
     justify-content: space-between;
     gap: 12px;
@@ -216,60 +275,80 @@ button:hover {
     margin: 16px 0;
 }
 
-.user-list {
-    display: grid;
-    gap: 12px;
+.user-list,
+.giftcode-list,
+.post-list {
     max-height: 680px;
     overflow: auto;
     padding-right: 4px;
 }
 
-.user-card {
+.user-card,
+.thread-card,
+.giftcode-card,
+.post-card,
+.reward-row {
     border: 1px solid var(--line);
     border-radius: 18px;
     background: var(--bg-panel-strong);
     padding: 16px;
-    cursor: pointer;
     transition: transform 140ms ease, border-color 140ms ease;
 }
 
 .user-card:hover,
-.user-card.active {
+.user-card.active,
+.thread-card:hover,
+.thread-card.active,
+.giftcode-card:hover {
     transform: translateY(-2px);
     border-color: rgba(15, 118, 110, 0.35);
 }
 
 .user-card-top,
-.user-card-meta {
+.user-card-meta,
+.thread-card-meta,
+.giftcode-meta,
+.reward-row {
     display: flex;
     justify-content: space-between;
     gap: 10px;
 }
 
-.user-card-top strong {
+.user-card-top strong,
+.thread-card strong,
+.giftcode-card strong {
     font-size: 1.05rem;
 }
 
 .user-card small,
-.user-card p {
+.user-card p,
+.thread-card small {
     color: var(--muted);
 }
 
-.user-card-meta {
+.user-card-meta,
+.thread-card-meta,
+.giftcode-meta {
     margin-top: 12px;
     font-size: 0.9rem;
+    flex-wrap: wrap;
 }
 
-.status-badge {
+.status-badge,
+.role-badge,
+.giftcode-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 999px;
     padding: 8px 14px;
-    background: rgba(15, 118, 110, 0.12);
-    color: var(--accent-strong);
     font-size: 0.9rem;
     white-space: nowrap;
+}
+
+.status-badge {
+    background: rgba(15, 118, 110, 0.12);
+    color: var(--accent-strong);
 }
 
 .status-badge.warn {
@@ -282,14 +361,29 @@ button:hover {
     color: var(--danger);
 }
 
-.detail-view {
-    display: grid;
-    gap: 16px;
+.role-badge {
+    background: rgba(29, 78, 216, 0.1);
+    color: var(--info);
 }
 
-.detail-card {
-    display: grid;
-    gap: 16px;
+.role-badge.admin {
+    background: rgba(180, 35, 24, 0.12);
+    color: var(--danger);
+}
+
+.role-badge.contributor {
+    background: rgba(15, 118, 110, 0.12);
+    color: var(--accent-strong);
+}
+
+.giftcode-badge {
+    background: rgba(15, 118, 110, 0.12);
+    color: var(--accent-strong);
+}
+
+.giftcode-badge.inactive {
+    background: rgba(180, 35, 24, 0.12);
+    color: var(--danger);
 }
 
 .metric-grid {
@@ -327,8 +421,8 @@ button:hover {
     gap: 16px;
 }
 
-.two-column {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.form-grid-wide {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 label span {
@@ -356,6 +450,91 @@ label span {
     font-size: 0.88rem;
 }
 
+.compact-code {
+    min-height: 120px;
+    max-height: 220px;
+}
+
+.thread-content,
+.reward-help {
+    display: grid;
+    gap: 10px;
+}
+
+.reward-help {
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px dashed var(--line);
+    background: rgba(255, 255, 255, 0.55);
+    font-size: 0.92rem;
+}
+
+.toggle-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.65);
+    color: var(--text);
+}
+
+.toggle-card input {
+    width: auto;
+    margin: 0;
+}
+
+.reward-row {
+    align-items: end;
+}
+
+.reward-row-fields {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 1fr;
+    gap: 12px;
+    flex: 1;
+}
+
+.reward-row button {
+    white-space: nowrap;
+}
+
+.giftcode-card,
+.post-card,
+.thread-card {
+    display: grid;
+    gap: 12px;
+}
+
+.giftcode-rewards,
+.post-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.reward-chip {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.68);
+    border: 1px solid var(--line);
+    font-size: 0.84rem;
+}
+
+.post-card {
+    background: rgba(255, 255, 255, 0.75);
+}
+
+.post-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
 .empty-state {
     display: grid;
     place-items: center;
@@ -363,6 +542,10 @@ label span {
     border-radius: 20px;
     border: 1px dashed rgba(65, 54, 32, 0.24);
     color: var(--muted);
+}
+
+.compact-empty-state {
+    min-height: 180px;
 }
 
 .hidden {
@@ -373,15 +556,31 @@ label span {
     min-height: 1.4em;
 }
 
-@media (max-width: 1120px) {
-    .hero,
+@media (max-width: 1280px) {
+    .workspace-secondary,
     .workspace,
-    .form-grid,
-    .save-grid {
+    .moderation-grid,
+    .form-grid-wide {
         grid-template-columns: 1fr;
     }
 
-    .summary-grid,
+    .summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .toggle-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 1120px) {
+    .hero,
+    .form-grid,
+    .save-grid,
+    .reward-row-fields {
+        grid-template-columns: 1fr;
+    }
+
     .metric-grid.compact {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -409,5 +608,10 @@ label span {
     .detail-card,
     .secret-card {
         padding: 16px;
+    }
+
+    .detail-badges,
+    .action-row {
+        grid-auto-flow: row;
     }
 }

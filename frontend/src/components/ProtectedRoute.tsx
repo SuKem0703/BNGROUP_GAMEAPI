@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useAuthStore } from '@/store/auth-store';
+import { normalizeRoleName } from '@/utils/roles';
 
 interface RouteGuardProps {
   children?: ReactNode;
@@ -40,6 +41,27 @@ export function PublicOnlyRoute({ children }: RouteGuardProps) {
   }
 
   if (token) {
+    return <Navigate replace to="/dashboard" />;
+  }
+
+  return children ? <>{children}</> : <Outlet />;
+}
+
+export function AdminRoute({ children }: RouteGuardProps) {
+  const location = useLocation();
+  const token = useAuthStore((state) => state.token);
+  const userRole = useAuthStore((state) => state.user?.role);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+
+  if (!hasHydrated) {
+    return <RouteGate pendingLabel="Opening admin console..." />;
+  }
+
+  if (!token) {
+    return <Navigate replace state={{ from: location }} to="/login" />;
+  }
+
+  if (normalizeRoleName(userRole) !== 'Admin') {
     return <Navigate replace to="/dashboard" />;
   }
 

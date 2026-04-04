@@ -24,3 +24,8 @@ export interface CreateThreadPayload {
   title: string;
   content: string;
 }
+
+export interface CreateReplyPayload {
+  threadId: number;
+  content: string;
+}

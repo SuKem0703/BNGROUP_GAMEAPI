@@ -6,6 +6,7 @@ import { login } from '@/api/auth';
 import { AuthCard } from '@/components/AuthCard';
 import { AuthInput } from '@/components/AuthInput';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { RoleBadge } from '@/components/RoleBadge';
 import { useToast } from '@/hooks/useToast';
 import { useAuthStore } from '@/store/auth-store';
 import { normalizeApiError } from '@/utils/normalize';
@@ -35,7 +36,9 @@ export function LoginPage() {
       }
 
       setAuth({ token: response.token, user: response.user });
-      toast.success(`Welcome back, ${response.user?.username ?? 'adventurer'}.`);
+      toast.success(
+        `Welcome back, ${response.user?.username ?? 'adventurer'}${response.user?.role ? ` (${response.user.role})` : ''}.`,
+      );
 
       const destination =
         typeof location.state === 'object' &&
@@ -83,6 +86,12 @@ export function LoginPage() {
         </span>
       }
     >
+      <div className="flex flex-wrap items-center gap-3 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-slate-300">
+        <span>New login responses now include access tier data.</span>
+        <RoleBadge role="Player" />
+        <RoleBadge role="Contributor" />
+        <RoleBadge role="Admin" />
+      </div>
       <form
         className="space-y-5"
         onSubmit={(event) => {
