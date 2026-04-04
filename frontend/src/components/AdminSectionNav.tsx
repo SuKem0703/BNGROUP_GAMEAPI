@@ -5,6 +5,7 @@ const adminNavItems = [
   { to: '/admin/users', label: 'Users' },
   { to: '/admin/forum', label: 'Forum' },
   { to: '/admin/giftcodes', label: 'GiftCodes' },
+  { to: '/admin/shoplogs', label: 'Shop Logs' },
 ];
 
 export function AdminSectionNav() {

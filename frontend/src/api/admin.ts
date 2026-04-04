@@ -3,6 +3,7 @@ import type {
   AdminForumThreadSummary,
   AdminForumThreadDetail,
   AdminGiftCode,
+  AdminShopLog,
   AdminSummary,
   AdminUserDetail,
   AdminUserSummary,
@@ -63,6 +64,14 @@ export async function deleteAdminForumPost(postId: number) {
 export async function getAdminGiftCodes(search = '') {
   const response = await apiClient.get<{ summary: AdminSummary; giftCodes: AdminGiftCode[] }>(
     '/Admin/giftcodes',
+    { params: { search } },
+  );
+  return response.data;
+}
+
+export async function getAdminShopLogs(search = '') {
+  const response = await apiClient.get<{ summary: AdminSummary; logs: AdminShopLog[] }>(
+    '/Admin/shoplogs',
     { params: { search } },
   );
   return response.data;

@@ -69,6 +69,9 @@ export function DashboardPage() {
             <Link className="btn-secondary" to="/giftcodes">
               Redeem giftcode
             </Link>
+            <Link className="btn-secondary" to="/shop">
+              Visit shop
+            </Link>
             {isAdmin ? (
               <Link className="btn-secondary" to="/admin">
                 Open admin

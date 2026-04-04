@@ -14,6 +14,8 @@ import { Role } from "../models/user/Role";
 import { GiftCode } from "../models/giftcode/GiftCode";
 import { GiftCodeReward } from "../models/giftcode/GiftCodeReward";
 import { GiftCodeRedemption } from "../models/giftcode/GiftCodeRedemption";
+import { ItemDef } from "../models/game/ItemDef";
+import { ItemSeeder } from "../utils/ItemSeeder";
 
 const getDbConfig = () => {
     const type = (process.env.DB_TYPE as any) || "mysql";
@@ -47,7 +49,8 @@ export const ApplicationDbContext = new DataSource({
         Role,
         GiftCode,
         GiftCodeReward,
-        GiftCodeRedemption
+        GiftCodeRedemption,
+        ItemDef
     ]
 });
 
@@ -139,6 +142,8 @@ export const initializeDatabase = async () => {
 
         await ApplicationDbContext.initialize();
         await ensureGiftCodeSchema();
+        
+        await ItemSeeder.seedItems();
 
         console.log("===== CONNECTED DB =====");
         console.log(ApplicationDbContext.options.database);

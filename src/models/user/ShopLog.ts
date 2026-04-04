@@ -14,14 +14,26 @@ export class ShopLog {
     @Column({ type: 'int' })
     quantity!: number;
 
-    @Column({ type: 'int' })
+    @Column({ type: 'int', default: 0 })
     priceAtMoment!: number;
 
-    @Column({ type: 'varchar' })
+    @Column({ type: 'varchar', nullable: true })
     currency!: string;
 
-    @Column({ type: 'int' })
+    @Column({ type: 'int', default: 0 })
     totalCost!: number;
+
+    @Column({ type: 'int', default: 0 })
+    balanceBefore!: number;
+
+    @Column({ type: 'int', default: 0 })
+    balanceAfter!: number;
+
+    @Column({ type: 'boolean', default: true })
+    isSuccess!: boolean;
+
+    @Column({ type: 'varchar', nullable: true })
+    errorMessage!: string;
 
     @CreateDateColumn()
     date: Date = new Date();

@@ -7,6 +7,20 @@ export interface AdminSummary {
   totalReplies?: number;
   totalGiftCodes?: number;
   activeGiftCodes?: number;
+  totalShopPurchases?: number;
+  totalShopRevenue?: number;
+}
+
+export interface AdminShopLog {
+  id: number;
+  accountId: string;
+  itemId: number;
+  itemName: string;
+  quantity: number;
+  priceAtMoment: number;
+  currency: string;
+  totalCost: number;
+  date: string;
 }
 
 export interface AdminUserSummary {

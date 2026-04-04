@@ -37,6 +37,7 @@ router.get('/Admin/forum', adminMiddleware, AdminController.getForumDashboard);
 router.get('/Admin/forum/threads/:threadId', adminMiddleware, AdminController.getForumThreadDetail);
 router.delete('/Admin/forum/threads/:threadId', adminMiddleware, AdminController.deleteForumThread);
 router.delete('/Admin/forum/posts/:postId', adminMiddleware, AdminController.deleteForumPost);
+router.get('/Admin/shoplogs', adminMiddleware, AdminController.getShopLogs);
 router.get('/Admin/giftcodes', adminMiddleware, AdminController.getGiftCodes);
 router.post('/Admin/giftcodes', adminMiddleware, AdminController.createGiftCode);
 router.patch('/Admin/giftcodes/:giftCodeId/state', adminMiddleware, AdminController.updateGiftCodeState);
@@ -65,6 +66,7 @@ router.post('/PlayerStats/distribute', authMiddleware, PlayerStatsController.dis
 router.post('/PlayerStats/reset', authMiddleware, PlayerStatsController.resetStats);
 router.post('/PlayerStats/add-exp', authMiddleware, PlayerStatsController.addExperience);
 
+router.get('/Shop/items', authMiddleware, ShopController.getShopItems);
 router.post('/Shop/buy', authMiddleware, ShopController.buyItem);
 
 router.get('/Storage/load-map-storage', authMiddleware, StorageController.getMapStorage);

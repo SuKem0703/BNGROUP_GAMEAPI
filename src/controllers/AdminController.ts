@@ -7,9 +7,11 @@ import { GiftCodeRedemption } from '../models/giftcode/GiftCodeRedemption';
 import { Account, AccountStatus } from '../models/user/Account';
 import { FarmPlot } from '../models/user/FarmPlot';
 import { Role, RoleType } from '../models/user/Role';
+import { ShopLog } from '../models/user/ShopLog';
 import { SaveData } from '../models/user/SaveData';
 import { StorageItem } from '../models/user/StorageItem';
 import { UserCurrency } from '../models/user/UserCurrency';
+import { ItemDef } from '../models/game/ItemDef';
 import { UserItem } from '../models/user/UserItem';
 import { UserStat } from '../models/user/UserStat';
 import { GiftCodeService } from '../services/GiftCodeService';
@@ -327,6 +329,45 @@ export class AdminController {
                 totalReplies: filteredThreads.reduce((total, thread) => total + thread.postCount, 0)
             },
             threads: filteredThreads
+        });
+    }
+
+    public static async getShopLogs(req: Request, res: Response): Promise<void> {
+        const search = String(req.query.search || '').trim().toLowerCase();
+
+        const queryBuilder = ApplicationDbContext.manager
+            .createQueryBuilder(ShopLog, 'shoplog')
+            .leftJoin(ItemDef, 'item', 'item.id = shoplog.itemId')
+            .orderBy('shoplog.date', 'DESC');
+
+        if (search) {
+            queryBuilder.where(
+                'LOWER(shoplog.accountId) LIKE :search OR LOWER(item.name) LIKE :search OR LOWER(shoplog.currency) LIKE :search',
+                { search: `%${search}%` },
+            );
+        }
+
+        const rawLogs = await queryBuilder.getRawMany();
+        const logs = rawLogs.map((raw) => ({
+            id: raw.shoplog_id,
+            accountId: raw.shoplog_accountId,
+            itemId: raw.shoplog_itemId,
+            itemName: raw.item_name || `Item ${raw.shoplog_itemId}`,
+            quantity: raw.shoplog_quantity,
+            priceAtMoment: raw.shoplog_priceAtMoment,
+            currency: raw.shoplog_currency,
+            totalCost: raw.shoplog_totalCost,
+            date: raw.shoplog_date,
+        }));
+
+        const totalRevenue = logs.reduce((sum, log) => sum + (log.totalCost || 0), 0);
+
+        res.status(200).json({
+            summary: {
+                totalShopPurchases: logs.length,
+                totalShopRevenue: totalRevenue,
+            },
+            logs,
         });
     }
 

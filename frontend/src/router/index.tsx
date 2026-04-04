@@ -4,8 +4,10 @@ import { AppShell } from '@/layouts/AppShell';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { AdminForumPage } from '@/pages/AdminForumPage';
 import { AdminGiftCodesPage } from '@/pages/AdminGiftCodesPage';
+import { AdminShopLogsPage } from '@/pages/AdminShopLogsPage';
 import { AdminUsersPage } from '@/pages/AdminUsersPage';
 import { DashboardPage } from '@/pages/DashboardPage';
+import { ShopPage } from '@/pages/ShopPage';
 import { ForumCreatePage } from '@/pages/ForumCreatePage';
 import { ForumDetailPage } from '@/pages/ForumDetailPage';
 import { ForumListPage } from '@/pages/ForumListPage';
@@ -65,6 +67,7 @@ export const appRouter = createBrowserRouter([
         errorElement: <RouteErrorPage />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
+          { path: '/shop', element: <ShopPage /> },
           { path: '/giftcodes', element: <GiftCodePage /> },
           { path: '/leaderboard', element: <LeaderboardPage /> },
           { path: '/forum/create', element: <ForumCreatePage /> },
@@ -84,6 +87,7 @@ export const appRouter = createBrowserRouter([
           { path: '/admin/users', element: <AdminUsersPage /> },
           { path: '/admin/forum', element: <AdminForumPage /> },
           { path: '/admin/giftcodes', element: <AdminGiftCodesPage /> },
+          { path: '/admin/shoplogs', element: <AdminShopLogsPage /> },
         ],
       },
     ],
