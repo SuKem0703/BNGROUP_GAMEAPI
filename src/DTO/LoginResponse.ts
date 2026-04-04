@@ -1,4 +1,5 @@
 export class LoginResponse {
-    id!: number;
+    accountId!: number;
     username: string = '';
+    role: string = '';
 }

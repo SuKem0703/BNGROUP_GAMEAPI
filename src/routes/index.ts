@@ -17,7 +17,6 @@ import { FarmController } from '../controllers/FarmController';
 
 const router = Router();
 
-router.post('/GameData/login', GameDataController.login);
 router.get('/GameData/ping', GameDataController.ping);
 
 router.post('/Accounts/Create', AccountsController.register);

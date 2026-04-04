@@ -7,32 +7,6 @@ import { JwtHelper } from '../utils/JwtHelper';
 import { TimeHelper } from '../utils/TimeHelper';
 
 export class GameDataController {
-    public static async login(req: Request, res: Response): Promise<void> {
-        const { username, password } = req.body;
-
-        const account = await ApplicationDbContext.getRepository(Account).findOne({ 
-            where: { username },
-            relations: ['role']
-        });
-
-        if (!account || !PasswordHasher.verify(password, account.passwordHash)) {
-            res.status(401).json("Sai tên người dùng hoặc mật khẩu.");
-            return;
-        }
-
-        if (account.status === AccountStatus.Ban) {
-            res.status(403).json("Tài khoản đã bị khóa.");
-            return;
-        }
-
-        const secretKey = process.env.JWT_SECRET || 'default_secret_key_32_chars_long';
-        const issuer = process.env.JWT_ISSUER || 'issuer';
-        const audience = process.env.JWT_AUDIENCE || 'audience';
-        const token = JwtHelper.generateToken(account.id!, account.username, account.role.name, secretKey, issuer, audience);
-
-        res.status(200).json({ token, userId: account.id, username: account.username });
-    }
-
     public static ping(req: Request, res: Response): void {
         res.status(200).json({ message: "Server is up", serverTime: TimeHelper.getVietnamTime() });
     }

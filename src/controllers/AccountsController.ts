@@ -131,9 +131,18 @@ export class AccountsController {
             }
 
             // Thay vì dùng CookieAuth như .NET, ta dùng JWT cho API
-            const token = JwtHelper.generateToken(account.id!, account.username, account.role.name, process.env.JWT_SECRET || 'your_super_secret_key_needs_to_be_long', 'your_issuer', 'your_audience');
+            const token = JwtHelper.generateToken(
+                account.id!,
+                account.username,
+                account.role.name,
+                process.env.JWT_SECRET || 'your_super_secret_key_needs_to_be_long','your_issuer', 'your_audience');
 
-            res.status(200).json({ token, accountId: account.id, username: account.username });
+            res.status(200).json({
+                token,
+                accountId: account.id,
+                username: account.username,
+                role: account.role.name
+            });
         } catch (error: any) {
             res.status(500).json({ error: "Lỗi server" });
         }
