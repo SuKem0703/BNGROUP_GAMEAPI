@@ -1,0 +1,749 @@
+openapi: 3.0.0
+info:
+  title: BNGroup Game API Documentation
+  version: '1.0.0'
+  description: 'Tài liệu hướng dẫn sử dụng các endpoint của API game BNGroup'
+
+servers:
+  - url: 'http://localhost:8080'
+    description: 'Development server'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID tài khoản
+        username:
+          type: string
+          description: Tên người dùng
+        email:
+          type: string
+          format: email
+          description: Email
+        createdAt:
+          type: string
+          format: date-time
+          description: Thời gian tạo
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Tên người dùng hoặc email
+        password:
+          type: string
+          format: password
+          description: Mật khẩu
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token
+        account:
+          $ref: '#/components/schemas/Account'
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          description: Tên người dùng
+        email:
+          type: string
+          format: email
+          description: Email
+        password:
+          type: string
+          format: password
+          description: Mật khẩu
+
+    GameSaveRequest:
+      type: object
+      required:
+        - dataSave
+      properties:
+        dataSave:
+          type: string
+          description: JSON string của dữ liệu game
+        reason:
+          type: string
+          description: Lý do lưu (tùy chọn)
+
+    CurrencyTransaction:
+      type: object
+      required:
+        - currencyType
+        - amount
+      properties:
+        currencyType:
+          type: string
+          enum: [coin, gem]
+          description: Loại tiền tệ
+        amount:
+          type: integer
+          description: Số lượng
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+          description: Thứ hạng
+        username:
+          type: string
+          description: Tên người dùng
+        level:
+          type: integer
+          description: Cấp độ
+        exp:
+          type: integer
+          description: Kinh nghiệm
+        coin:
+          type: integer
+          description: Số xu
+
+    InventoryItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID item
+        itemId:
+          type: string
+          description: ID định danh item
+        quantity:
+          type: integer
+          description: Số lượng
+        equipped:
+          type: boolean
+          description: Đã trang bị hay chưa
+
+    ForumThread:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID thread
+        title:
+          type: string
+          description: Tiêu đề
+        content:
+          type: string
+          description: Nội dung
+        author:
+          type: string
+          description: Tác giả
+        createdAt:
+          type: string
+          format: date-time
+          description: Thời gian tạo
+        updatedAt:
+          type: string
+          format: date-time
+          description: Thời gian cập nhật
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Accounts
+    description: Quản lý tài khoản người dùng
+  - name: GameData
+    description: Quản lý dữ liệu game
+  - name: Leaderboard
+    description: Bảng xếp hạng người chơi
+  - name: Economy
+    description: Quản lý tiền tệ và kinh tế
+  - name: Inventory
+    description: Quản lý kho đồ
+  - name: Forum
+    description: Diễn đàn và bài viết
+  - name: Admin
+    description: Chức năng quản trị viên
+  - name: Farm
+    description: Quản lý nông trại
+  - name: Shop
+    description: Cửa hàng
+  - name: PlayerStats
+    description: Thống kê người chơi
+  - name: Storage
+    description: Kho lưu trữ
+
+paths:
+  /api/GameData/ping:
+    get:
+      summary: Kiểm tra trạng thái server
+      tags: [GameData]
+      responses:
+        '200':
+          description: Server đang hoạt động
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  serverTime:
+                    type: string
+                    format: date-time
+
+  /api/Accounts/Create:
+    post:
+      summary: Đăng ký tài khoản mới
+      tags: [Accounts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Đăng ký thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  accountId:
+                    type: string
+        '400':
+          description: Dữ liệu không hợp lệ hoặc tài khoản đã tồn tại
+
+  /api/Accounts/Login:
+    post:
+      summary: Đăng nhập tài khoản
+      tags: [Accounts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Sai thông tin đăng nhập
+
+  /api/Accounts/Dashboard:
+    get:
+      summary: Lấy thông tin dashboard của người dùng
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Thông tin dashboard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stats:
+                    type: object
+                    properties:
+                      level:
+                        type: integer
+                      exp:
+                        type: integer
+                      potentialPoints:
+                        type: integer
+                      str:
+                        type: integer
+                      dex:
+                        type: integer
+                      int:
+                        type: integer
+                      con:
+                        type: integer
+                  currency:
+                    type: object
+                    properties:
+                      coin:
+                        type: integer
+                      gem:
+                        type: integer
+        '401':
+          description: Chưa xác thực
+
+  /api/GameData/get-save:
+    get:
+      summary: Lấy dữ liệu save game của người dùng
+      tags: [GameData]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dữ liệu save game
+          content:
+            application/json:
+              schema:
+                type: object
+                description: JSON data của game save
+        '401':
+          description: Chưa xác thực
+        '404':
+          description: Không tìm thấy dữ liệu save
+
+  /api/GameData/save-data:
+    post:
+      summary: Lưu dữ liệu game của người dùng
+      tags: [GameData]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameSaveRequest'
+      responses:
+        '200':
+          description: Lưu thành công
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Leaderboard:
+    get:
+      summary: Lấy bảng xếp hạng người chơi
+      tags: [Leaderboard]
+      responses:
+        '200':
+          description: Danh sách người chơi xếp hạng
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+
+  /api/Economy/balance:
+    get:
+      summary: Lấy số dư tiền tệ của người dùng
+      tags: [Economy]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Số dư tiền tệ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  coin:
+                    type: integer
+                    description: Số xu
+                  gem:
+                    type: integer
+                    description: Số gem
+        '401':
+          description: Chưa xác thực
+
+  /api/Economy/spend:
+    post:
+      summary: Chi tiêu tiền tệ
+      tags: [Economy]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurrencyTransaction'
+      responses:
+        '200':
+          description: Chi tiêu thành công
+        '400':
+          description: Số dư không đủ hoặc dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Economy/earn:
+    post:
+      summary: Kiếm tiền tệ
+      tags: [Economy]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurrencyTransaction'
+      responses:
+        '200':
+          description: Kiếm tiền thành công
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Inventory/sync:
+    get:
+      summary: Đồng bộ kho đồ của người dùng
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Danh sách items trong kho
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItem'
+        '401':
+          description: Chưa xác thực
+
+  /api/Inventory/equip:
+    post:
+      summary: Trang bị item
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+                - equipped
+              properties:
+                itemId:
+                  type: string
+                  description: ID của item
+                equipped:
+                  type: boolean
+                  description: Trạng thái trang bị
+      responses:
+        '200':
+          description: Trang bị thành công
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Inventory/move:
+    post:
+      summary: Di chuyển item trong kho
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+                - newPosition
+              properties:
+                itemId:
+                  type: string
+                  description: ID của item
+                newPosition:
+                  type: integer
+                  description: Vị trí mới
+      responses:
+        '200':
+          description: Di chuyển thành công
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Inventory/add:
+    post:
+      summary: Thêm item vào kho
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+                - quantity
+              properties:
+                itemId:
+                  type: string
+                  description: ID định danh item
+                quantity:
+                  type: integer
+                  description: Số lượng thêm
+      responses:
+        '200':
+          description: Thêm item thành công
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Inventory/update-quantity:
+    post:
+      summary: Cập nhật số lượng item
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+                - quantity
+              properties:
+                itemId:
+                  type: string
+                  description: ID của item
+                quantity:
+                  type: integer
+                  description: Số lượng mới
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Inventory/remove:
+    post:
+      summary: Xóa item khỏi kho
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+              properties:
+                itemId:
+                  type: string
+                  description: ID của item cần xóa
+      responses:
+        '200':
+          description: Xóa item thành công
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Forum:
+    get:
+      summary: Lấy danh sách threads diễn đàn
+      tags: [Forum]
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Trang hiện tại
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+          description: Số threads mỗi trang
+      responses:
+        '200':
+          description: Danh sách threads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ForumThread'
+
+  /api/Forum/Details/{id}:
+    get:
+      summary: Lấy chi tiết thread và các bài viết
+      tags: [Forum]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID của thread
+      responses:
+        '200':
+          description: Chi tiết thread
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForumThread'
+        '404':
+          description: Không tìm thấy thread
+
+  /api/Admin/dashboard:
+    get:
+      summary: Lấy thông tin dashboard admin
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Thông tin dashboard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalUsers:
+                    type: integer
+                  activeUsers:
+                    type: integer
+                  totalRevenue:
+                    type: integer
+        '401':
+          description: Chưa xác thực hoặc không phải admin
+
+  /api/Admin/users/{accountId}:
+    get:
+      summary: Lấy thông tin chi tiết user
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+          description: ID tài khoản
+      responses:
+        '200':
+          description: Thông tin user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: '#/components/schemas/Account'
+                  stats:
+                    type: object
+                  currency:
+                    type: object
+        '401':
+          description: Chưa xác thực hoặc không phải admin
+        '404':
+          description: Không tìm thấy user
+
+  /api/Admin/users/{accountId}/status:
+    patch:
+      summary: Cập nhật trạng thái user
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+          description: ID tài khoản
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [Active, Banned, Suspended]
+                  description: Trạng thái mới
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực hoặc không phải admin
+
+  /api/Admin/users/{accountId}/currency:
+    patch:
+      summary: Cập nhật tiền tệ của user
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+          description: ID tài khoản
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currencyType
+                - amount
+              properties:
+                currencyType:
+                  type: string
+                  enum: [coin, gem]
+                  description: Loại tiền tệ
+                amount:
+                  type: integer
+                  description: Số lượng mới
+      responses:
+        '200':
+          description: Cập nhật thành công
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực hoặc không phải admin

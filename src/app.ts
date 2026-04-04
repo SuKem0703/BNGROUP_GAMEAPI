@@ -3,12 +3,15 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import routes from './routes';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec, swaggerUiOptions } from './swagger';
 
 const app = express();
 const adminPath = path.join(process.cwd(), 'public', 'admin');
 const frontendPath = path.join(process.cwd(), 'public', 'app');
 const frontendIndexPath = path.join(frontendPath, 'index.html');
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use('/admin', express.static(adminPath));

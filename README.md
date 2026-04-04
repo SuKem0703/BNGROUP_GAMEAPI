@@ -31,6 +31,37 @@ API base URL:
 Admin UI:
 - `http://localhost:8080/admin`
 
+## API Documentation
+
+The API uses Swagger/OpenAPI for documentation. The complete API specification is defined in `swagger.yaml` at the root of the project.
+
+After starting the server, you can access the interactive API documentation at:
+
+- **Swagger UI**: `http://localhost:8080/api-docs`
+
+### Authentication
+
+Most endpoints require JWT authentication. To get a JWT token:
+
+1. Register a new account: `POST /api/Accounts/Create`
+2. Login to get token: `POST /api/Accounts/Login`
+
+Include the token in the `Authorization` header:
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+### API Structure
+
+The API is organized into the following main categories:
+- **Accounts**: User registration, login, and profile management
+- **GameData**: Game save/load functionality
+- **Leaderboard**: Player rankings and statistics
+- **Economy**: Currency management (coins/gems)
+- **Inventory**: Item management and equipment
+- **Forum**: Discussion threads and posts
+- **Admin**: Administrative functions
+
 ## Notes
 - The server auto-creates the database when `DB_TYPE=mysql`.
 - TypeORM uses `synchronize: true`, so tables are auto-created/updated for local development.
