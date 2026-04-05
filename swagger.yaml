@@ -128,7 +128,7 @@ components:
           type: string
           description: ID item
         itemId:
-          type: string
+          type: integer
           description: ID định danh item
         quantity:
           type: integer
@@ -1095,7 +1095,7 @@ paths:
                 - equipped
               properties:
                 itemId:
-                  type: string
+                  type: integer
                   description: ID của item
                 equipped:
                   type: boolean
@@ -1155,10 +1155,11 @@ paths:
                 - quantity
               properties:
                 itemId:
-                  type: string
+                  type: integer
                   description: ID định danh item
                 quantity:
                   type: integer
+                  default: 1
                   description: Số lượng thêm
       responses:
         '200':
@@ -1185,7 +1186,7 @@ paths:
                 - quantity
               properties:
                 itemId:
-                  type: string
+                  type: integer
                   description: ID của item
                 quantity:
                   type: integer
@@ -1214,7 +1215,7 @@ paths:
                 - itemId
               properties:
                 itemId:
-                  type: string
+                  type: integer
                   description: ID của item cần xóa
       responses:
         '200':

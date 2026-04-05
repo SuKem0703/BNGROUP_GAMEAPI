@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ApplicationDbContext } from '../config/database';
 import { UserItem } from '../models/user/UserItem';
 import { SaveData } from '../models/user/SaveData';
+import { AddItemRequest } from '../DTO/AddItemRequest';
 import { IsNull } from 'typeorm';
 
 export class InventoryController {
@@ -106,7 +107,7 @@ export class InventoryController {
             } else {
                 const tempSlot = targetItem.slotIndex;
                 targetItem.slotIndex = sourceItem.slotIndex;
-                sourceItem.slotIndex = newSlotIndex; // Fix: Assign newSlotIndex properly
+                sourceItem.slotIndex = newSlotIndex; 
                 await repo.save([targetItem, sourceItem]);
             }
         }
@@ -116,21 +117,54 @@ export class InventoryController {
 
     public static async addItem(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
-        const { itemId, quantity, slotIndex, rarity, qualityFactor } = req.body;
+        
+        const data: AddItemRequest = req.body;
+        
+        const itemIdNum = Number(data.itemId);
+        const quantity = Number(data.quantity);
 
-        const newItem = new UserItem();
-        newItem.accountId = accountId;
-        newItem.itemId = itemId;
-        newItem.quantity = quantity;
-        newItem.slotIndex = slotIndex;
-        newItem.isEquipped = false;
-        newItem.rarity = rarity;
-        newItem.qualityFactor = qualityFactor;
-        newItem.createdAt = new Date();
+        const repo = ApplicationDbContext.getRepository(UserItem);
 
-        await ApplicationDbContext.getRepository(UserItem).save(newItem);
+        const existingItem = await repo.findOne({
+            where: { accountId, itemId: itemIdNum, chestId: IsNull() }
+        });
 
-        res.status(200).json({ success: true, newDbId: newItem.id });
+        if (existingItem) {
+            existingItem.quantity += quantity;
+            await repo.save(existingItem);
+            res.status(200).json({ success: true, dbId: existingItem.id, action: "stacked" });
+            return;
+        }
+
+        let finalSlot = data.slotIndex;
+        if (finalSlot === undefined || finalSlot === null) {
+            const occupiedSlots = await repo.find({
+                where: { accountId, chestId: IsNull() },
+                select: ["slotIndex"],
+                order: { slotIndex: "ASC" }
+            });
+            
+            let candidate = 0;
+            for (const item of occupiedSlots) {
+                if (item.slotIndex === candidate) candidate++;
+                else break;
+            }
+            finalSlot = candidate;
+        }
+
+        const newItem = repo.create({
+            accountId,
+            itemId: itemIdNum,
+            quantity: quantity,
+            slotIndex: finalSlot,
+            isEquipped: false,
+            rarity: data.rarity ?? 1,
+            qualityFactor: data.qualityFactor ?? 1,
+            createdAt: new Date()
+        });
+
+        await repo.save(newItem);
+        res.status(200).json({ success: true, dbId: newItem.id, action: "created" });
     }
 
     public static async updateQuantity(req: Request, res: Response): Promise<void> {

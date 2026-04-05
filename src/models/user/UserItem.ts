@@ -25,11 +25,11 @@ export class UserItem {
     @Column({ type: 'boolean', default: false })
     isEquipped: boolean = false;
 
-    @Column({ type: 'int' })
-    rarity!: number;
+    @Column({ type: 'int', default: 1 })
+    rarity: number = 1;
 
-    @Column({ type: 'float' })
-    qualityFactor!: number;
+    @Column({ type: 'float', default: 1 })
+    qualityFactor: number = 1;
 
     @Column({ type: 'varchar', nullable: true })
     chestId?: string;
