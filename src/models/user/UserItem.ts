@@ -19,8 +19,8 @@ export class UserItem {
     @Column({ type: 'int', default: 1 })
     quantity: number = 1;
 
-    @Column({ type: 'int' })
-    slotIndex!: number;
+    @Column({ type: 'int', default: 0 })
+    slotIndex: number = 0;
 
     @Column({ type: 'boolean', default: false })
     isEquipped: boolean = false;
