@@ -137,29 +137,107 @@ components:
           type: boolean
           description: Đã trang bị hay chưa
 
-    ForumThread:
+    ShopItem:
       type: object
       properties:
         id:
+          type: integer
+          description: ID định danh item
+        name:
           type: string
-          description: ID thread
-        title:
+          description: Tên vật phẩm
+        description:
           type: string
-          description: Tiêu đề
-        content:
+          description: Mô tả vật phẩm
+        itemType:
           type: string
-          description: Nội dung
-        author:
+          description: Loại vật phẩm
+        isStackable:
+          type: boolean
+          description: Có thể chồng xếp hay không
+        rarity:
+          type: integer
+          description: Độ hiếm
+        buyPrice:
+          type: integer
+          description: Giá mua
+        sellPrice:
+          type: integer
+          description: Giá bán
+        currency:
           type: string
-          description: Tác giả
-        createdAt:
+          description: Loại tiền tệ
+        imageUrl:
+          type: string
+          nullable: true
+          description: Đường dẫn ảnh của vật phẩm
+
+    FarmPlot:
+      type: object
+      properties:
+        plotId:
+          type: integer
+          description: ID ô đất
+        seedItemId:
+          type: integer
+          description: ID giống cây trồng
+        plantedAt:
           type: string
           format: date-time
-          description: Thời gian tạo
-        updatedAt:
+          description: Thời điểm trồng
+
+    FarmAction:
+      type: object
+      required:
+        - plotId
+        - isRegrowable
+      properties:
+        plotId:
+          type: integer
+        isRegrowable:
+          type: boolean
+        offsetSeconds:
+          type: integer
+          description: Thời gian lùi lại khi tái sinh
+
+    PlayerStats:
+      type: object
+      properties:
+        level:
+          type: integer
+        exp:
+          type: integer
+        potentialPoints:
+          type: integer
+        str:
+          type: integer
+        dex:
+          type: integer
+        intStat:
+          type: integer
+        con:
+          type: integer
+
+    StorageItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        chestId:
+          type: string
+        slotIndex:
+          type: integer
+        itemId:
+          type: integer
+        quantity:
+          type: integer
+        rarity:
+          type: integer
+        qualityFactor:
+          type: number
+        depositedAt:
           type: string
           format: date-time
-          description: Thời gian cập nhật
 
 security:
   - bearerAuth: []
@@ -404,6 +482,579 @@ paths:
       responses:
         '200':
           description: Kiếm tiền thành công
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Farm/sync:
+    get:
+      summary: Đồng bộ trang trại của người dùng
+      tags: [Farm]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Thông tin trạng thái nông trại
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  serverTime:
+                    type: string
+                    format: date-time
+                  plots:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FarmPlot'
+        '401':
+          description: Chưa xác thực
+
+  /api/Farm/plant:
+    post:
+      summary: Trồng cây trên ô đất
+      tags: [Farm]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [plotId, seedItemId]
+              properties:
+                plotId:
+                  type: integer
+                seedItemId:
+                  type: integer
+      responses:
+        '200':
+          description: Trồng cây thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  plantedAt:
+                    type: string
+                    format: date-time
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Farm/harvest:
+    post:
+      summary: Thu hoạch cây trồng
+      tags: [Farm]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [actions]
+              properties:
+                actions:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FarmAction'
+      responses:
+        '200':
+          description: Thu hoạch thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  processed:
+                    type: integer
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Shop/items:
+    get:
+      summary: Lấy danh sách item shop
+      tags: [Shop]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Danh sách items shop
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShopItem'
+        '401':
+          description: Chưa xác thực
+
+  /api/Shop/buy:
+    post:
+      summary: Mua item trong shop
+      tags: [Shop]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [itemId, quantity]
+              properties:
+                itemId:
+                  type: integer
+                quantity:
+                  type: integer
+      responses:
+        '200':
+          description: Mua thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: Dữ liệu không hợp lệ hoặc không đủ tiền
+        '401':
+          description: Chưa xác thực
+
+  /api/Admin/shop-items:
+    get:
+      summary: Lấy danh sách item shop cho admin
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Tìm kiếm theo tên hoặc mô tả
+      responses:
+        '200':
+          description: Danh sách item shop cho admin
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShopItem'
+        '401':
+          description: Chưa xác thực
+
+    post:
+      summary: Tạo mới item shop
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, name, itemType, isStackable]
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                description:
+                  type: string
+                itemType:
+                  type: string
+                isStackable:
+                  type: boolean
+                rarity:
+                  type: integer
+                buyPrice:
+                  type: integer
+                sellPrice:
+                  type: integer
+                currency:
+                  type: string
+                imageUrl:
+                  type: string
+                  nullable: true
+      responses:
+        '201':
+          description: Tạo thành công item shop
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShopItem'
+        '400':
+          description: Dữ liệu không hợp lệ hoặc item đã tồn tại
+        '401':
+          description: Chưa xác thực
+
+  /api/Admin/shop-items/{itemId}:
+    patch:
+      summary: Cập nhật item shop
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                itemType:
+                  type: string
+                isStackable:
+                  type: boolean
+                rarity:
+                  type: integer
+                buyPrice:
+                  type: integer
+                sellPrice:
+                  type: integer
+                currency:
+                  type: string
+                imageUrl:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Cập nhật thành công item shop
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShopItem'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+        '404':
+          description: Item không tồn tại
+
+    delete:
+      summary: Xóa item shop
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Xóa thành công item shop
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Dữ liệu không hợp lệ hoặc item đang được sở hữu
+        '401':
+          description: Chưa xác thực
+        '404':
+          description: Item không tồn tại
+
+  /api/Admin/shop-items/{itemId}/image:
+    post:
+      summary: Upload hoặc cập nhật ảnh item shop
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [imageBase64]
+              properties:
+                imageBase64:
+                  type: string
+                filename:
+                  type: string
+      responses:
+        '200':
+          description: Upload ảnh thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  imageUrl:
+                    type: string
+        '400':
+          description: Dữ liệu không hợp lệ hoặc item không tồn tại
+        '401':
+          description: Chưa xác thực
+
+  /api/PlayerStats/profile:
+    get:
+      summary: Lấy thông tin nhân vật người chơi
+      tags: [PlayerStats]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Thông tin nhân vật
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerStats'
+        '401':
+          description: Chưa xác thực
+
+  /api/PlayerStats/distribute:
+    post:
+      summary: Phân bổ điểm tiềm năng
+      tags: [PlayerStats]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [str, dex, intStat, con]
+              properties:
+                str:
+                  type: integer
+                dex:
+                  type: integer
+                intStat:
+                  type: integer
+                con:
+                  type: integer
+      responses:
+        '200':
+          description: Phân bổ điểm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerStats'
+        '400':
+          description: Dữ liệu không hợp lệ hoặc không đủ điểm
+        '401':
+          description: Chưa xác thực
+
+  /api/PlayerStats/reset:
+    post:
+      summary: Reset điểm nhân vật bằng Gem
+      tags: [PlayerStats]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Reset thành công hoặc thất bại
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  newStats:
+                    $ref: '#/components/schemas/PlayerStats'
+                  coin:
+                    type: integer
+                  gem:
+                    type: integer
+        '400':
+          description: Lỗi xử lý
+        '401':
+          description: Chưa xác thực
+
+  /api/PlayerStats/add-exp:
+    post:
+      summary: Thêm kinh nghiệm cho người chơi
+      tags: [PlayerStats]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: integer
+      responses:
+        '200':
+          description: Thêm EXP thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  leveledUp:
+                    type: boolean
+                  newStats:
+                    $ref: '#/components/schemas/PlayerStats'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Storage/load-map-storage:
+    get:
+      summary: Lấy danh sách item trong storage theo scene
+      tags: [Storage]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: sceneName
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Danh sách item trong storage
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StorageItem'
+        '400':
+          description: Thiếu sceneName
+        '401':
+          description: Chưa xác thực
+
+  /api/Storage/load-chest:
+    get:
+      summary: Lấy danh sách item trong storage theo chestId
+      tags: [Storage]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: chestId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Danh sách item trong chest
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StorageItem'
+        '401':
+          description: Chưa xác thực
+
+  /api/Storage/deposit:
+    post:
+      summary: Gửi item vào kho
+      tags: [Storage]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [itemDbId, chestId, slotIndex, isStackable]
+              properties:
+                itemDbId:
+                  type: integer
+                chestId:
+                  type: string
+                slotIndex:
+                  type: integer
+                isStackable:
+                  type: boolean
+      responses:
+        '200':
+          description: Gửi item thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Chưa xác thực
+
+  /api/Storage/withdraw:
+    post:
+      summary: Rút item ra khỏi kho
+      tags: [Storage]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [itemDbId, slotIndex, isStackable]
+              properties:
+                itemDbId:
+                  type: integer
+                slotIndex:
+                  type: integer
+                isStackable:
+                  type: boolean
+      responses:
+        '200':
+          description: Rút item thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
         '400':
           description: Dữ liệu không hợp lệ
         '401':

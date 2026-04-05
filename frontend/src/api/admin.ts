@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/axios';
+import type { ShopItem } from '@/types/shop';
 import type {
   AdminForumThreadSummary,
   AdminForumThreadDetail,
@@ -74,6 +75,52 @@ export async function getAdminShopLogs(search = '') {
     '/Admin/shoplogs',
     { params: { search } },
   );
+  return response.data;
+}
+
+export async function getAdminShopItems(search = '') {
+  const response = await apiClient.get<ShopItem[]>('/Admin/shop-items', { params: { search } });
+  return response.data;
+}
+
+export async function createAdminShopItem(payload: {
+  id: number;
+  name: string;
+  description?: string | null;
+  itemType: string;
+  isStackable: boolean;
+  rarity: number;
+  buyPrice: number;
+  sellPrice: number;
+  currency: string;
+  imageUrl?: string | null;
+}) {
+  const response = await apiClient.post('/Admin/shop-items', payload);
+  return response.data;
+}
+
+export async function updateAdminShopItem(itemId: number, payload: {
+  name?: string;
+  description?: string | null;
+  itemType?: string;
+  isStackable?: boolean;
+  rarity?: number;
+  buyPrice?: number;
+  sellPrice?: number;
+  currency?: string;
+  imageUrl?: string | null;
+}) {
+  const response = await apiClient.patch(`/Admin/shop-items/${itemId}`, payload);
+  return response.data;
+}
+
+export async function deleteAdminShopItem(itemId: number) {
+  const response = await apiClient.delete(`/Admin/shop-items/${itemId}`);
+  return response.data;
+}
+
+export async function uploadAdminShopItemImage(itemId: number, payload: { imageBase64: string; filename?: string }) {
+  const response = await apiClient.post(`/Admin/shop-items/${itemId}/image`, payload);
   return response.data;
 }
 

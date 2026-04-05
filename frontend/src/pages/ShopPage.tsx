@@ -139,12 +139,20 @@ export function ShopPage() {
               return (
                 <div key={item.id} className="group rounded-[32px] border border-white/10 bg-white/5 p-6 transition hover:border-accent-200/30 hover:bg-white/10">
                   <div className="aspect-[4/3] overflow-hidden rounded-[28px] bg-slate-950/60 p-4 text-center text-slate-400">
-                    <div className="mx-auto flex h-full w-full max-w-[140px] flex-col items-center justify-center gap-3">
-                      <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white/5 text-3xl text-slate-300">
-                        #{item.id}
+                    {item.imageUrl ? (
+                      <img
+                        className="h-full w-full object-contain"
+                        src={item.imageUrl}
+                        alt={item.name}
+                      />
+                    ) : (
+                      <div className="mx-auto flex h-full w-full max-w-[140px] flex-col items-center justify-center gap-3">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white/5 text-3xl text-slate-300">
+                          #{item.id}
+                        </div>
+                        <span className="text-sm uppercase tracking-[0.14em] text-slate-400">Asset coming</span>
                       </div>
-                      <span className="text-sm uppercase tracking-[0.14em] text-slate-400">Asset coming</span>
-                    </div>
+                    )}
                   </div>
 
                   <div className="mt-5 space-y-3">

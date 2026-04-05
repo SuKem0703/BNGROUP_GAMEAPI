@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { Request, Response } from 'express';
 import { ApplicationDbContext } from '../config/database';
 import { UserCurrency } from '../models/user/UserCurrency';
@@ -120,9 +122,209 @@ export class ShopController {
             description: item.description,
             itemType: item.itemType,
             isStackable: item.isStackable,
+            rarity: item.rarity,
             buyPrice: item.buyPrice,
+            sellPrice: item.sellPrice,
             currency: item.currency,
+            imageUrl: item.imageUrl ?? null,
         })));
+    }
+
+    public static async getShopItemsForAdmin(req: Request, res: Response): Promise<void> {
+        const search = String(req.query.search || '').trim().toLowerCase();
+        const repo = ApplicationDbContext.getRepository(ItemDef);
+        const items = await repo.find({ order: { buyPrice: 'ASC' } });
+
+        const filtered = items.filter((item) => {
+            if (!search) return true;
+            return [
+                String(item.id),
+                item.name,
+                item.description || '',
+                item.currency,
+                item.itemType,
+            ].some((value) => value.toLowerCase().includes(search));
+        });
+
+        res.status(200).json(filtered.map((item) => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            itemType: item.itemType,
+            isStackable: item.isStackable,
+            rarity: item.rarity,
+            buyPrice: item.buyPrice,
+            sellPrice: item.sellPrice,
+            currency: item.currency,
+            imageUrl: item.imageUrl ?? null,
+        })));
+    }
+
+    public static async createShopItem(req: Request, res: Response): Promise<void> {
+        const {
+            id,
+            name,
+            description,
+            itemType,
+            isStackable,
+            rarity,
+            buyPrice,
+            sellPrice,
+            currency,
+            imageUrl,
+        } = req.body;
+
+        if (!id || !name || !itemType || typeof isStackable !== 'boolean') {
+            res.status(400).json({ message: 'Missing required item fields.' });
+            return;
+        }
+
+        try {
+            const existing = await ApplicationDbContext.manager.findOne(ItemDef, { where: { id } });
+            if (existing) {
+                res.status(400).json({ message: 'Item ID already exists.' });
+                return;
+            }
+
+            const itemDef = new ItemDef();
+            itemDef.id = id;
+            itemDef.name = name;
+            itemDef.description = description || null;
+            itemDef.itemType = itemType;
+            itemDef.isStackable = isStackable;
+            itemDef.rarity = Number.isFinite(rarity) ? Number(rarity) : 1;
+            itemDef.buyPrice = Number.isFinite(buyPrice) ? Number(buyPrice) : 0;
+            itemDef.sellPrice = Number.isFinite(sellPrice) ? Number(sellPrice) : 0;
+            itemDef.currency = currency;
+            itemDef.imageUrl = imageUrl || null;
+
+            await ApplicationDbContext.manager.save(itemDef);
+            res.status(201).json(itemDef);
+        } catch (error: any) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    public static async updateShopItem(req: Request, res: Response): Promise<void> {
+        const itemId = Number(req.params.itemId);
+        if (!itemId || itemId <= 0) {
+            res.status(400).json({ message: 'Invalid itemId.' });
+            return;
+        }
+
+        const {
+            name,
+            description,
+            itemType,
+            isStackable,
+            rarity,
+            buyPrice,
+            sellPrice,
+            currency,
+            imageUrl,
+        } = req.body;
+
+        try {
+            const itemDef = await ApplicationDbContext.manager.findOne(ItemDef, { where: { id: itemId } });
+            if (!itemDef) {
+                res.status(404).json({ message: 'Item not found.' });
+                return;
+            }
+
+            if (name !== undefined) itemDef.name = name;
+            if (description !== undefined) itemDef.description = description;
+            if (itemType !== undefined) itemDef.itemType = itemType;
+            if (isStackable !== undefined) itemDef.isStackable = isStackable;
+            if (rarity !== undefined) itemDef.rarity = Number(rarity);
+            if (buyPrice !== undefined) itemDef.buyPrice = Number(buyPrice);
+            if (sellPrice !== undefined) itemDef.sellPrice = Number(sellPrice);
+            if (currency !== undefined) itemDef.currency = currency;
+            if (imageUrl !== undefined) itemDef.imageUrl = imageUrl;
+
+            await ApplicationDbContext.manager.save(itemDef);
+            res.status(200).json(itemDef);
+        } catch (error: any) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    public static async deleteShopItem(req: Request, res: Response): Promise<void> {
+        const itemId = Number(req.params.itemId);
+        if (!itemId || itemId <= 0) {
+            res.status(400).json({ message: 'Invalid itemId.' });
+            return;
+        }
+
+        try {
+            const itemDef = await ApplicationDbContext.manager.findOne(ItemDef, { where: { id: itemId } });
+            if (!itemDef) {
+                res.status(404).json({ message: 'Item not found.' });
+                return;
+            }
+
+            const ownedCount = await ApplicationDbContext.manager.count(UserItem, { where: { itemId } });
+            if (ownedCount > 0) {
+                res.status(400).json({ message: 'Cannot delete item while players still own it.' });
+                return;
+            }
+
+            await ApplicationDbContext.manager.remove(itemDef);
+            res.status(200).json({ message: 'Item deleted successfully.' });
+        } catch (error: any) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    public static async updateShopItemImage(req: Request, res: Response): Promise<void> {
+        const itemId = Number(req.params.itemId);
+        const { imageBase64, filename } = req.body;
+
+        if (!itemId || itemId <= 0) {
+            res.status(400).json({ message: 'Invalid itemId' });
+            return;
+        }
+
+        if (!imageBase64 || typeof imageBase64 !== 'string') {
+            res.status(400).json({ message: 'imageBase64 is required' });
+            return;
+        }
+
+        try {
+            const itemDef = await ApplicationDbContext.manager.findOne(ItemDef, { where: { id: itemId } });
+            if (!itemDef) {
+                res.status(404).json({ message: 'Item not found' });
+                return;
+            }
+
+            let rawBase64 = imageBase64;
+            let extension = 'png';
+            const dataUriMatch = imageBase64.match(/^data:(image\/(png|jpeg|jpg|gif));base64,(.+)$/i);
+            if (dataUriMatch) {
+                const mimeType = dataUriMatch[1];
+                rawBase64 = dataUriMatch[3];
+                extension = mimeType.split('/')[1] === 'jpeg' ? 'jpg' : mimeType.split('/')[1];
+            } else if (filename) {
+                const extFromFilename = path.extname(filename).replace('.', '').toLowerCase();
+                if (['png', 'jpg', 'jpeg', 'gif'].includes(extFromFilename)) {
+                    extension = extFromFilename === 'jpeg' ? 'jpg' : extFromFilename;
+                }
+            }
+
+            const buffer = Buffer.from(rawBase64, 'base64');
+            const mediaDir = path.join(process.cwd(), 'public', 'media', 'shop-items');
+            await fs.promises.mkdir(mediaDir, { recursive: true });
+
+            const safeFilename = `item-${itemId}.${extension}`;
+            const filePath = path.join(mediaDir, safeFilename);
+            await fs.promises.writeFile(filePath, buffer);
+
+            itemDef.imageUrl = `/media/shop-items/${safeFilename}`;
+            await ApplicationDbContext.manager.save(itemDef);
+
+            res.status(200).json({ id: itemDef.id, imageUrl: itemDef.imageUrl });
+        } catch (error: any) {
+            res.status(500).json({ message: error?.message || 'Unable to upload image' });
+        }
     }
 
     private static async createNewItem(manager: any, accountId: string, itemDef: ItemDef, quantity: number, occupiedSlots: Set<number>) {

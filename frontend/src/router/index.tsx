@@ -4,6 +4,7 @@ import { AppShell } from '@/layouts/AppShell';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { AdminForumPage } from '@/pages/AdminForumPage';
 import { AdminGiftCodesPage } from '@/pages/AdminGiftCodesPage';
+import { AdminShopItemsPage } from '@/pages/AdminShopItemsPage';
 import { AdminShopLogsPage } from '@/pages/AdminShopLogsPage';
 import { AdminUsersPage } from '@/pages/AdminUsersPage';
 import { DashboardPage } from '@/pages/DashboardPage';
@@ -87,6 +88,7 @@ export const appRouter = createBrowserRouter([
           { path: '/admin/users', element: <AdminUsersPage /> },
           { path: '/admin/forum', element: <AdminForumPage /> },
           { path: '/admin/giftcodes', element: <AdminGiftCodesPage /> },
+          { path: '/admin/shop-items', element: <AdminShopItemsPage /> },
           { path: '/admin/shoplogs', element: <AdminShopLogsPage /> },
         ],
       },

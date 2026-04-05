@@ -53,4 +53,7 @@ export class ItemDef {
 
     @Column({ type: 'enum', enum: CurrencyType, default: CurrencyType.Coin })
     currency!: CurrencyType;
+
+    @Column({ nullable: true })
+    imageUrl?: string;
 }

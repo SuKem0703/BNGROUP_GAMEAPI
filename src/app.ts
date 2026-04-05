@@ -9,12 +9,14 @@ import { swaggerSpec, swaggerUiOptions } from './swagger';
 const app = express();
 const adminPath = path.join(process.cwd(), 'public', 'admin');
 const frontendPath = path.join(process.cwd(), 'public', 'app');
+const mediaPath = path.join(process.cwd(), 'public', 'media');
 const frontendIndexPath = path.join(frontendPath, 'index.html');
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use('/admin-panel', express.static(adminPath));
+app.use('/media', express.static(mediaPath));
 app.use('/api', routes);
 app.use(express.static(frontendPath));
 

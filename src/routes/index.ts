@@ -68,6 +68,11 @@ router.post('/PlayerStats/add-exp', authMiddleware, PlayerStatsController.addExp
 
 router.get('/Shop/items', authMiddleware, ShopController.getShopItems);
 router.post('/Shop/buy', authMiddleware, ShopController.buyItem);
+router.get('/Admin/shop-items', adminMiddleware, ShopController.getShopItemsForAdmin);
+router.post('/Admin/shop-items', adminMiddleware, ShopController.createShopItem);
+router.patch('/Admin/shop-items/:itemId', adminMiddleware, ShopController.updateShopItem);
+router.delete('/Admin/shop-items/:itemId', adminMiddleware, ShopController.deleteShopItem);
+router.post('/Admin/shop-items/:itemId/image', adminMiddleware, ShopController.updateShopItemImage);
 
 router.get('/Storage/load-map-storage', authMiddleware, StorageController.getMapStorage);
 router.get('/Storage/load-chest', authMiddleware, StorageController.getSingleChest);
