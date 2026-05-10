@@ -1,8 +1,11 @@
 import { Request, Response } from 'express';
-import { In } from "typeorm";
+import { In, LessThan, IsNull } from "typeorm";
 import { ApplicationDbContext } from '../config/database';
 import { FarmPlot } from '../models/user/FarmPlot';
+import { UserItem } from '../models/user/UserItem';
 import { TimeHelper } from '../utils/TimeHelper';
+import { BulkHarvestRequestDTO, PlantSeedRequestDTO } from '../DTO/FarmDTO';
+import { CropConfig } from '../config/CropConfig';
 
 export class FarmController {
     public static async syncFarm(req: Request, res: Response): Promise<void> {
@@ -11,7 +14,6 @@ export class FarmController {
             where: { accountId }
         });
         
-        // Trả về kèm thời gian hiện tại của Server để Client dễ đồng bộ
         res.status(200).json({ 
             serverTime: TimeHelper.getVietnamTime(), 
             plots 
@@ -20,20 +22,19 @@ export class FarmController {
 
     public static async plantSeed(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
-        const { plotId, seedItemId } = req.body;
+        const data = req.body as PlantSeedRequestDTO;
 
         const repo = ApplicationDbContext.getRepository(FarmPlot);
-        let plot = await repo.findOne({ where: { accountId, plotId } });
+        let plot = await repo.findOne({ where: { accountId, plotId: data.plotId } });
 
         if (plot) {
-            // Ghi đè nếu ô đất đã có (phòng hờ lỗi đồng bộ)
-            plot.seedItemId = seedItemId;
+            plot.seedItemId = data.seedItemId;
             plot.plantedAt = TimeHelper.getVietnamTime();
         } else {
             plot = new FarmPlot();
             plot.accountId = accountId;
-            plot.plotId = plotId;
-            plot.seedItemId = seedItemId;
+            plot.plotId = data.plotId;
+            plot.seedItemId = data.seedItemId;
             plot.plantedAt = TimeHelper.getVietnamTime();
         }
 
@@ -43,32 +44,48 @@ export class FarmController {
 
     public static async harvestCrop(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
-        const { actions } = req.body;
+        const data = req.body as BulkHarvestRequestDTO;
 
-        if (!actions || !Array.isArray(actions) || actions.length === 0) {
+        if (!data.plotIds || !Array.isArray(data.plotIds) || data.plotIds.length === 0) {
             res.status(400).json("Danh sách thu hoạch trống.");
             return;
         }
 
-        const repo = ApplicationDbContext.getRepository(FarmPlot);
+        const farmRepo = ApplicationDbContext.getRepository(FarmPlot);
         
-        const plotIds = actions.map((a: any) => a.plotId);
-
-        const plots = await repo.find({
-            where: { accountId: accountId, plotId: In(plotIds) }
+        const plots = await farmRepo.find({
+            where: { accountId: accountId, plotId: In(data.plotIds) }
         });
 
         const plotsToRemove: FarmPlot[] = [];
         const plotsToUpdate: FarmPlot[] = [];
+        
+        const harvestedItemsAggregated: Record<number, number> = {}; 
+
         const now = TimeHelper.getVietnamTime();
 
-        for (const action of actions) {
-            const plot = plots.find(p => p.plotId === action.plotId);
-            if (!plot) continue;
+        for (const plot of plots) {
+            const config = CropConfig[plot.seedItemId];
+            if (!config) {
+                console.warn(`[Farm] Cấu hình không tồn tại cho hạt giống: ${plot.seedItemId}`);
+                continue;
+            }
 
-            if (action.isRegrowable) {
+            const secondsElapsed = (now.getTime() - plot.plantedAt.getTime()) / 1000;
+            
+            if (secondsElapsed + 2 < config.totalGrowthTime) {
+                console.warn(`[Anti-Cheat] Account ${accountId} cố gắng thu hoạch sớm ô ${plot.plotId}!`);
+                continue; 
+            }
+
+            if (!harvestedItemsAggregated[config.harvestItemId]) {
+                harvestedItemsAggregated[config.harvestItemId] = 0;
+            }
+            harvestedItemsAggregated[config.harvestItemId] += config.harvestAmount;
+
+            if (config.isRegrowable) {
                 const newPlantedAt = new Date(now.getTime());
-                newPlantedAt.setSeconds(newPlantedAt.getSeconds() - (action.offsetSeconds || 0));
+                newPlantedAt.setSeconds(newPlantedAt.getSeconds() - config.regrowOffset);
                 plot.plantedAt = newPlantedAt;
                 plotsToUpdate.push(plot);
             } else {
@@ -77,14 +94,40 @@ export class FarmController {
         }
 
         await ApplicationDbContext.manager.transaction(async manager => {
-            if (plotsToUpdate.length > 0) {
-                await manager.save(plotsToUpdate);
-            }
-            if (plotsToRemove.length > 0) {
-                await manager.remove(plotsToRemove);
+            if (plotsToUpdate.length > 0) await manager.save(plotsToUpdate);
+            if (plotsToRemove.length > 0) await manager.remove(plotsToRemove);
+
+            for (const itemIdStr in harvestedItemsAggregated) {
+                const itemId = Number(itemIdStr);
+                const quantity = harvestedItemsAggregated[itemId];
+
+                const existingItem = await manager.findOne(UserItem, {
+                    where: { accountId, itemId: itemId, chestId: IsNull(), slotIndex: LessThan(2000) }
+                });
+
+                if (existingItem) {
+                    existingItem.quantity += quantity;
+                    await manager.save(existingItem);
+                } else {
+                    const allItems = await manager.find(UserItem, { where: { accountId, chestId: IsNull(), slotIndex: LessThan(1000) } });
+                    const occupiedSlots = new Set(allItems.map(i => i.slotIndex));
+                    let freeSlot = 0;
+                    while (occupiedSlots.has(freeSlot)) freeSlot++;
+
+                    const newItem = manager.create(UserItem, {
+                        accountId,
+                        itemId: itemId,
+                        quantity: quantity,
+                        slotIndex: freeSlot,
+                        isEquipped: false,
+                        rarity: 1,
+                        qualityFactor: 1
+                    });
+                    await manager.save(newItem);
+                }
             }
         });
 
-        res.status(200).json({ success: true, processed: actions.length });
+        res.status(200).json({ success: true, processed: plotsToUpdate.length + plotsToRemove.length });
     }
 }

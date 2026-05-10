@@ -4,9 +4,10 @@ import { UserItem } from '../models/user/UserItem';
 import { SaveData } from '../models/user/SaveData';
 import { AddItemRequestDTO, EquipItemRequestDTO, MoveItemRequestDTO, RemoveItemRequestDTO, UpdateQuantityRequestDTO } from '../DTO/InventoryDTO';
 import { ItemGenerationHelper, SeededRandom } from '../utils/ItemGenerationHelper';
-import { IsNull } from 'typeorm';
+import { IsNull, LessThan } from 'typeorm';
 
 export class InventoryController {
+    
     private static async migrateOldDataIfNeeded(accountId: string): Promise<void> {
         const repo = ApplicationDbContext.getRepository(UserItem);
         const hasItems = await repo.exist({ where: { accountId } });
@@ -18,7 +19,6 @@ export class InventoryController {
         try {
             const oldData = JSON.parse(oldSave.dataSave);
             const migratedItems: UserItem[] = [];
-
             if (oldData.inventorySaveData) {
                 for (const item of oldData.inventorySaveData) {
                     const ui = new UserItem();
@@ -32,7 +32,6 @@ export class InventoryController {
                     migratedItems.push(ui);
                 }
             }
-
             if (oldData.hotbarSaveData) {
                 for (const item of oldData.hotbarSaveData) {
                     const ui = new UserItem();
@@ -46,10 +45,7 @@ export class InventoryController {
                     migratedItems.push(ui);
                 }
             }
-
-            if (migratedItems.length > 0) {
-                await repo.save(migratedItems);
-            }
+            if (migratedItems.length > 0) await repo.save(migratedItems);
         } catch { }
     }
 
@@ -60,10 +56,10 @@ export class InventoryController {
         const items = await ApplicationDbContext.getRepository(UserItem).find({
             where: { accountId, chestId: IsNull() }
         });
-
         res.status(200).json(items);
     }
 
+    // Thao tác mặc đồ
     public static async setEquipState(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
         const data = req.body as EquipItemRequestDTO;
@@ -72,62 +68,75 @@ export class InventoryController {
         const item = await repo.findOne({ where: { id: data.itemDbId, accountId } });
 
         if (!item) {
-            res.status(404).json("Item không tồn tại hoặc đã bị xóa.");
+            res.status(404).json("Vật phẩm không tồn tại hoặc bạn không có quyền sở hữu.");
             return;
         }
 
         item.isEquipped = data.isEquipped;
         await repo.save(item);
-
         res.status(200).json({ success: true });
     }
 
+    // Logic Di chuyển / Cộng dồn / Hoán đổi / Tích hợp, Xử lý Swap
     public static async moveItem(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
         const data = req.body as MoveItemRequestDTO;
         const repo = ApplicationDbContext.getRepository(UserItem);
 
-        const sourceItem = await repo.findOne({ where: { id: data.itemDbId, accountId } });
-        if (!sourceItem) {
-            res.status(404).json({ message: "Source item not found" });
-            return;
-        }
+        await ApplicationDbContext.transaction(async (transactionalEntityManager) => {
+            const sourceItem = await transactionalEntityManager.findOne(UserItem, { 
+                where: { id: data.itemDbId, accountId } 
+            });
 
-        const targetItem = await repo.findOne({
-            where: { accountId, slotIndex: data.newSlotIndex, chestId: sourceItem.chestId ?? IsNull() }
-        });
+            if (!sourceItem) throw new Error("Source item not found");
 
-        if (!targetItem) {
-            sourceItem.slotIndex = data.newSlotIndex;
-            await repo.save(sourceItem);
-        } else {
-            if (data.isStackable && targetItem.itemId === sourceItem.itemId) {
-                targetItem.quantity += sourceItem.quantity;
-                await repo.save(targetItem);
-                await repo.remove(sourceItem);
+            const targetItem = await transactionalEntityManager.findOne(UserItem, {
+                where: { accountId, slotIndex: data.newSlotIndex, chestId: sourceItem.chestId ?? IsNull() }
+            });
+
+            if (!targetItem) {
+                sourceItem.slotIndex = data.newSlotIndex;
+                sourceItem.isEquipped = data.newSlotIndex >= 2000;
+                await transactionalEntityManager.save(sourceItem);
             } else {
-                const tempSlot = targetItem.slotIndex;
-                targetItem.slotIndex = sourceItem.slotIndex;
-                sourceItem.slotIndex = data.newSlotIndex; 
-                await repo.save([targetItem, sourceItem]);
+                if (data.isStackable && targetItem.itemId === sourceItem.itemId) {
+                    targetItem.quantity += sourceItem.quantity;
+                    await transactionalEntityManager.save(targetItem);
+                    await transactionalEntityManager.remove(sourceItem);
+                } else {
+                    const oldSourceSlot = sourceItem.slotIndex;
+                    targetItem.slotIndex = oldSourceSlot;
+                    sourceItem.slotIndex = data.newSlotIndex;
+
+                    targetItem.isEquipped = targetItem.slotIndex >= 2000;
+                    sourceItem.isEquipped = sourceItem.slotIndex >= 2000;
+
+                    const itemsToSave = [sourceItem, targetItem].sort((a, b) => a.id - b.id);
+                    await transactionalEntityManager.save(itemsToSave);
+                }
             }
-        }
+        });
 
         res.status(200).json({ success: true });
     }
 
+    // Thêm vật phẩm
     public static async addItem(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
         const data = req.body as AddItemRequestDTO;
         
         const itemIdNum = Number(data.itemId);
         const quantity = Number(data.quantity);
-
         const repo = ApplicationDbContext.getRepository(UserItem);
 
         if (data.isStackable) {
             const existingItem = await repo.findOne({
-                where: { accountId, itemId: itemIdNum, chestId: IsNull() }
+                where: { 
+                    accountId, 
+                    itemId: itemIdNum, 
+                    chestId: IsNull(),
+                    slotIndex: LessThan(2000)
+                }
             });
 
             if (existingItem) {
@@ -138,7 +147,7 @@ export class InventoryController {
             }
         }
 
-        let finalSlot = data.slotIndex;
+        // Logic Anti-Cheat với Seed
         let finalRarity = data.rarity ?? 1;
         let finalQuality = data.qualityFactor ?? 1;
 
@@ -148,30 +157,29 @@ export class InventoryController {
             const expectedQuality = ItemGenerationHelper.getWeightedQualityFactor(rng);
 
             if (expectedRarity !== finalRarity || Math.abs(expectedQuality - finalQuality) > 0.01) {
-                console.warn(`[Anti-Cheat] Phát hiện gian lận từ Account ${accountId}. Chỉ số không khớp với Seed ${data.validationSeed}.`);
-                
-                res.status(403).json({ 
-                    success: false, 
-                    message: "Phát hiện dữ liệu vật phẩm không hợp lệ! Hành động đã bị hủy." 
-                });
+                console.warn(`[Anti-Cheat] Account ${accountId} cố gắng hack chỉ số.`);
+                res.status(403).json({ success: false, message: "Dữ liệu không hợp lệ!" });
                 return;
             }
         }
 
+        const currentSlot = data.slotIndex ?? 0;
+
         const newItem = repo.create({
-            accountId,
-            itemId: itemIdNum,
-            quantity: quantity,
-            slotIndex: finalSlot,
-            isEquipped: false,
-            rarity: finalRarity,
-            qualityFactor: finalQuality
-        });
+        accountId,
+        itemId: itemIdNum,
+        quantity: quantity,
+        slotIndex: currentSlot,
+        isEquipped: currentSlot >= 2000, 
+        rarity: finalRarity,
+        qualityFactor: finalQuality
+    });
 
         await repo.save(newItem);
         res.status(200).json({ success: true, dbId: newItem.id, action: "created" });
     }
-
+    
+    // Cập nhật số lượng
     public static async updateQuantity(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
         const data = req.body as UpdateQuantityRequestDTO;
@@ -179,7 +187,7 @@ export class InventoryController {
 
         const item = await repo.findOne({ where: { id: data.itemDbId, accountId } });
         if (!item) {
-            res.status(404).json({ message: "Item not found" });
+            res.status(404).json({ message: "Không tìm thấy vật phẩm hoặc sai quyền sở hữu." });
             return;
         }
 
@@ -193,14 +201,16 @@ export class InventoryController {
         res.status(200).json({ success: true });
     }
 
+    // Xóa vật phẩm
     public static async removeItem(req: Request, res: Response): Promise<void> {
         const accountId = (req as any).user.accountId;
         const data = req.body as RemoveItemRequestDTO;
         const repo = ApplicationDbContext.getRepository(UserItem);
 
+        // Ownership Check
         const item = await repo.findOne({ where: { id: data.itemDbId, accountId } });
         if (!item) {
-            res.status(404).json({ message: "Item not found" });
+            res.status(404).json({ message: "Không tìm thấy vật phẩm hoặc sai quyền sở hữu." });
             return;
         }
 
