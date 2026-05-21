@@ -130,4 +130,24 @@ export class FarmController {
 
         res.status(200).json({ success: true, processed: plotsToUpdate.length + plotsToRemove.length });
     }
+
+    public static async destroyCrop(req: Request, res: Response): Promise<void> {
+        const accountId = (req as any).user.accountId;
+        const data = req.body as { plotId: string };
+
+        if (!data.plotId) {
+            res.status(400).json("Mã ô đất trống.");
+            return;
+        }
+
+        const repo = ApplicationDbContext.getRepository(FarmPlot);
+        const plot = await repo.findOne({ where: { accountId, plotId: data.plotId } });
+
+        if (plot) {
+            await repo.remove(plot);
+            res.status(200).json({ success: true, message: "Đã huỷ cây trồng" });
+        } else {
+            res.status(404).json({ success: false, message: "Không tìm thấy cây để huỷ" });
+        }
+    }
 }

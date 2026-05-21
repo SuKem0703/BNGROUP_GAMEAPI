@@ -85,6 +85,7 @@ router.post('/Forum/Reply', authMiddleware, ForumController.reply);
 router.get('/Farm/sync', authMiddleware, FarmController.syncFarm);
 router.post('/Farm/plant', authMiddleware, FarmController.plantSeed);
 router.post('/Farm/harvest', authMiddleware, FarmController.harvestCrop);
+router.post('/Farm/destroy', authMiddleware, FarmController.destroyCrop);
 
 router.post('/SaveData/upload', authMiddleware, SaveDataController.uploadSaveData);
 
